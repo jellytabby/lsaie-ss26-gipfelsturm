@@ -109,8 +109,9 @@ fi
 
 ################ Generate script ################
 mkdir -p logs
+mkdir -p scripts
 
-SCRIPT="logs/${JOB_NAME}.sbatch"
+SCRIPT="scripts/${JOB_NAME}.sbatch"
 
 cat > "$SCRIPT" << 'HEADER'
 #!/bin/bash
@@ -121,7 +122,7 @@ cat >> "$SCRIPT" << SBATCH_DIRECTIVES
 #SBATCH --time=${TIME}
 #SBATCH --job-name=${JOB_NAME}
 #SBATCH --output=logs/%x-%j.log
-#SBATCH --error=logs/%x-%j.log
+#SBATCH --error=logs/%x-%j.err
 #SBATCH --nodes=${NODES}
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=4
