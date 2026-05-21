@@ -1,0 +1,26 @@
+diff --git a/pretrain_gpt.py b/pretrain_gpt.py
+index 8eff08d24..138186b6e 100644
+--- a/pretrain_gpt.py
++++ b/pretrain_gpt.py
+@@ -326,6 +326,12 @@ def get_embedding_ranks(pp_ranks: List[int]):
+     return embedding_ranks
+ 
+ 
++def compiled_model_provider(pre_process=True, post_process=True, **kwargs):
++    """Builds the model and applies torch.compile."""
++    model = model_provider(gpt_builder, pre_process=pre_process, post_process=post_process, **kwargs)
++    return torch.compile(model)
++
++
+ if __name__ == "__main__":
+     # Timestamp right after entering __main__ block (after all imports/library setup)
+     _MAIN_ENTRY_TIME = time.time()
+@@ -341,7 +347,7 @@ if __name__ == "__main__":
+ 
+     pretrain(
+         train_valid_test_datasets_provider,
+-        partial(model_provider, gpt_builder),
++        compiled_model_provider,
+         ModelType.encoder_or_decoder,
+         forward_step,
+         args_defaults={'tokenizer_type': 'GPT2BPETokenizer'},

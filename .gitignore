@@ -1,3 +1,6 @@
 logs/
 data/climbmix_small/
 config.sh
+.venv/
+core_nid*
+scripts/*
