@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Usage: ./launch.sh <mode> <model_size> [steps] [nodes]
+# Usage: ./launch.sh <mode> <model_size> [steps] [nodes] [--mbs=N] [--offload|--no-offload]
 #
 # Modes:     throughput  (50 steps, with W&B)
 #            train       (N steps, with W&B and Tensorboard)
@@ -10,10 +10,15 @@
 # Steps:     required for train mode (e.g., 1000, 5000, 15000)
 # Nodes:     optional, default 4 (max 8)
 #
+# Flags:     --mbs=N        override the per-model default micro-batch size
+#            --offload      enable CPU activation offloading (default)
+#            --no-offload   disable CPU activation offloading
+#
 # Examples:  ./launch.sh throughput 760m
 #            ./launch.sh throughput 8b 50 1
 #            ./launch.sh train 760m 5000
 #            ./launch.sh train 1.5b 3000 8
+#            ./launch.sh throughput 760m 50 1 --mbs=6 --no-offload
 
 set -euo pipefail
 
@@ -21,6 +26,17 @@ source "$(dirname "$0")/config.sh"
 
 MODE=${1:?Usage: ./launch.sh <mode> <model_size> [steps] [nodes]}
 MODEL_SIZE=${2:?Usage: ./launch.sh <mode> <model_size> [steps] [nodes]}
+
+################ Optional flag parsing ################
+MBS_OVERRIDE=""
+OFFLOAD_ENABLED=true
+for arg in "$@"; do
+    case $arg in
+        --mbs=*)      MBS_OVERRIDE="${arg#--mbs=}" ;;
+        --no-offload) OFFLOAD_ENABLED=false ;;
+        --offload)    OFFLOAD_ENABLED=true ;;
+    esac
+done
 
 ################ Mode config ################
 case $MODE in
@@ -85,9 +101,19 @@ case $MODEL_SIZE in
         ;;
 esac
 
+if [ -n "$MBS_OVERRIDE" ]; then MBS=$MBS_OVERRIDE; fi
+
+if [ "$OFFLOAD_ENABLED" = true ]; then
+    OFFLOAD_LABEL="offload"
+    CPU_OFFLOAD_BLOCK="--fine-grained-activation-offloading --offload-modules core_attn qkv_linear attn_proj mlp_norm attn_norm"
+else
+    OFFLOAD_LABEL="nooffload"
+    CPU_OFFLOAD_BLOCK=""
+fi
+
 GBS=256
 SEQ_LEN=4096
-JOB_NAME="gipfel-${MODE}-${MODEL_SIZE}-${TRAINING_STEPS}s-${NODES}n"
+JOB_NAME="gipfel-${MODE}-${MODEL_SIZE}-mbs${MBS}-${OFFLOAD_LABEL}-${TRAINING_STEPS}s-${NODES}n"
 
 ################ W&B block ################
 if [ "$WANDB" = true ]; then
@@ -154,7 +180,7 @@ TRAINING_STEPS=${TRAINING_STEPS}
 
 # Logging
 PROJECT_NAME=gipfelsturm
-EXP_NAME=${MODE}-${MODEL_SIZE}-\${SLURM_NNODES}n
+EXP_NAME=${MODE}-${MODEL_SIZE}-mbs${MBS}-${OFFLOAD_LABEL}-\${SLURM_NNODES}n
 LOG_DIR=/iopsstor/scratch/cscs/\$USER/gipfelsturm/\$PROJECT_NAME/\$EXP_NAME
 TENSORBOARD_DIR=\$LOG_DIR/tensorboard
 CONFIGS
@@ -184,12 +210,11 @@ TRANSFORMER_ENGINE_ARGS=(
     --main-grads-dtype bf16
 )
 
-CPU_OFFLOAD_ARGS=(
-    --fine-grained-activation-offloading
-    --offload-modules core_attn qkv_linear attn_proj mlp_norm attn_norm
-)
-
 SETUP
+
+cat >> "$SCRIPT" << CPU_OFFLOAD
+CPU_OFFLOAD_ARGS=(${CPU_OFFLOAD_BLOCK})
+CPU_OFFLOAD
 
 cat >> "$SCRIPT" << MODEL
 NETWORK_SIZE_ARGS=(
