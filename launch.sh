@@ -79,8 +79,20 @@ case $MODEL_SIZE in
         NUM_LAYERS=32; HIDDEN=4096; FFN=14336; HEADS=32; KV_HEADS=8
         MBS=2
         ;;
+    40.5b)
+        NUM_LAYERS=36; HIDDEN=6144; FFN=21504; HEADS=48; KV_HEADS=8
+        MBS=1
+        ;;
+    80b)
+        NUM_LAYERS=40; HIDDEN=8192; FFN=28672; HEADS=64; KV_HEADS=8
+        MBS=1
+        ;;
+    130b)
+        NUM_LAYERS=52; HIDDEN=9216; FFN=32256; HEADS=72; KV_HEADS=8
+        MBS=1
+        ;;
     *)
-        echo "Unknown model size: $MODEL_SIZE. Choose: 125m, 350m, 760m, 1.5b, 3b, 8b"
+        echo "Unknown model size: $MODEL_SIZE. Choose: 125m, 350m, 760m, 1.5b, 3b, 8b, 130b"
         exit 1
         ;;
 esac
