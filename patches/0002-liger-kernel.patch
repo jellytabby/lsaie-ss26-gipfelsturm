@@ -1,0 +1,145 @@
+diff --git a/megatron/core/fusions/fused_bias_swiglu.py b/megatron/core/fusions/fused_bias_swiglu.py
+index 632470876..cfda73f60 100644
+--- a/megatron/core/fusions/fused_bias_swiglu.py
++++ b/megatron/core/fusions/fused_bias_swiglu.py
+@@ -9,6 +9,14 @@ import torch.nn.functional as F
+ from megatron.core.jit import jit_fuser
+ from megatron.core.utils import nvtx_decorator
+ 
++try:
++    from liger_kernel.ops.swiglu import LigerSiLUMulFunction
++    HAVE_LIGER_SWIGLU = True
++except ImportError:
++    HAVE_LIGER_SWIGLU = False
++if __import__('os').environ.get('LOCAL_RANK', '-1') in ('0', '-1'):
++    print(f'[Liger] SwiGLU: {"ACTIVE" if HAVE_LIGER_SWIGLU else "not installed — Megatron fusion fallback"}', flush=True)
++
+ ###### BIAS SWIGLU FUSION/ NO AUTOGRAD ################
+ 
+ 
+@@ -225,6 +233,14 @@ def bias_swiglu_impl(input, bias, fp8_input_store=False, cpu_offload_input=False
+     Raises:
+         AssertionError: If input tensor does not have 2 or 3 dimensions.
+     """
++    if HAVE_LIGER_SWIGLU and bias is None and not fp8_input_store and not cpu_offload_input:
++        ori_shape = input.shape
++        assert len(ori_shape) in [2, 3]
++        input_2d = input.reshape(-1, ori_shape[-1])
++        y_1, y_2 = torch.chunk(input_2d, 2, -1)
++        output = LigerSiLUMulFunction.apply(y_1, y_2)
++        return output if len(ori_shape) == 2 else output.view(ori_shape[0], ori_shape[1], -1)
++    
+     ori_shape = input.shape
+     assert len(ori_shape) in [2, 3]
+     input = input.view(-1, ori_shape[-1])
+diff --git a/megatron/core/models/common/language_module/language_module.py b/megatron/core/models/common/language_module/language_module.py
+index b0fa6126b..770e52321 100644
+--- a/megatron/core/models/common/language_module/language_module.py
++++ b/megatron/core/models/common/language_module/language_module.py
+@@ -31,6 +31,15 @@ from megatron.core.utils import (
+     make_tp_sharded_tensor_for_checkpoint,
+ )
+ 
++try:
++    from liger_kernel.ops.cross_entropy import LigerCrossEntropyFunction
++    HAVE_LIGER_CE = True
++except ImportError:
++    HAVE_LIGER_CE = False
++if __import__('os').environ.get('LOCAL_RANK', '-1') in ('0', '-1'):
++    print(f'[Liger] CrossEntropy: {"ACTIVE" if HAVE_LIGER_CE else "not installed — fused_vocab_parallel fallback"}', flush=True)
++
++
+ 
+ class LanguageModule(MegatronModule):
+     """Base language module that has common helper functions used across GPT, BERT etc.
+@@ -162,7 +171,19 @@ class LanguageModule(MegatronModule):
+                 else:
+                     raise RuntimeError("Trying to use a TE block when it's not present.")
+             elif self.config.cross_entropy_fusion_impl == 'native':
+-                loss = fused_vocab_parallel_cross_entropy(logits, labels, self.pg_collection.tp)
++                tp_size = parallel_state.get_tensor_model_parallel_world_size()
++                if HAVE_LIGER_CE and tp_size == 1:
++                    # Liger CE expects 2-D [s*b, vocab]; Megatron logits are [s, b, vocab].
++                    # Labels are already [s, b] after the transpose above.
++                    s, b = logits.shape[0], logits.shape[1]
++                    _loss_1d, *_ = LigerCrossEntropyFunction.apply(
++                        logits.reshape(s * b, -1),
++                        labels.reshape(s * b),
++                        None, -100, 0.0, 0.0, 'none', None, False, False, False
++                    )
++                    loss = _loss_1d.view(s, b)
++                else:
++                    loss = fused_vocab_parallel_cross_entropy(logits, labels, self.pg_collection.tp)
+         else:
+             loss = tensor_parallel.vocab_parallel_cross_entropy(logits, labels)
+ 
+
+diff --git a/megatron/core/extensions/transformer_engine.py b/megatron/core/extensions/transformer_engine.py
+index ef8527e9e..0bd8fce66 100644
+--- a/megatron/core/extensions/transformer_engine.py
++++ b/megatron/core/extensions/transformer_engine.py
+@@ -78,6 +78,29 @@ except ImportError:
+ 
+ _TE_CONFIG_TYPE_KEY = "transformer_engine_config_type"
+ 
++try:
++    from liger_kernel.ops.rms_norm import LigerRMSNormFunction
++    HAVE_LIGER_RMSNORM = True
++except ImportError:
++    HAVE_LIGER_RMSNORM = False
++
++if __import__('os').environ.get('LOCAL_RANK', '-1') in ('0', '-1'):
++    print(f'[Liger] RMSNorm: {"ACTIVE" if HAVE_LIGER_RMSNORM else "not installed — Megatron fallback"}', flush=True)
++
++class LigerRMSNormWrapper(torch.nn.Module):
++    def __init__(self, hidden_size, eps=1e-5, sequence_parallel=False):
++        super().__init__()
++        self.weight = torch.nn.Parameter(torch.ones(hidden_size))
++        self.eps = eps
++        # Required by Megatron's distributed optimizer to correctly route weight gradients
++        setattr(self.weight, 'sequence_parallel', sequence_parallel)
++
++    def forward(self, x):
++        ori_shape = x.shape
++        x_2d = x.reshape(-1, ori_shape[-1])
++        out = LigerRMSNormFunction.apply(x_2d, self.weight, self.eps)
++        return out.view(ori_shape)
++
+ 
+ class TransformerEngineConfigType(enum.Enum):
+     """Configuration object types in config dictionary"""
+@@ -451,16 +474,23 @@ class TENorm:
+                 **_get_extra_te_kwargs(config),
+             )
+         elif config.normalization == "RMSNorm":
+-            assert hasattr(
+-                te.pytorch, "RMSNorm"
+-            ), "Transformer-Engine >= v0.11 required to use this feature"
+-            instance = te.pytorch.RMSNorm(
+-                hidden_size=hidden_size,
+-                eps=eps,
+-                sequence_parallel=config.sequence_parallel,
+-                zero_centered_gamma=config.layernorm_zero_centered_gamma,
+-                **_get_extra_te_kwargs(config),
+-            )
++            if HAVE_LIGER_RMSNORM and not config.layernorm_zero_centered_gamma:
++                instance = LigerRMSNormWrapper(
++                    hidden_size=hidden_size,
++                    eps=eps,
++                    sequence_parallel=config.sequence_parallel,
++                )
++            else:
++                assert hasattr(
++                    te.pytorch, "RMSNorm"
++                ), "Transformer-Engine >= v0.11 required to use this feature"
++                instance = te.pytorch.RMSNorm(
++                    hidden_size=hidden_size,
++                    eps=eps,
++                    sequence_parallel=config.sequence_parallel,
++                    zero_centered_gamma=config.layernorm_zero_centered_gamma,
++                    **_get_extra_te_kwargs(config),
++                )
+         else:
+             raise Exception("Only LayerNorm and RMSNorm are curently supported")
+ 
+
