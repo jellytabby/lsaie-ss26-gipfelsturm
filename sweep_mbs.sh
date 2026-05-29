@@ -14,7 +14,7 @@ STEPS=50
 NODES=1
 
 for OFFLOAD_FLAG in --offload --no-offload; do
-    for MBS in 6 7 8 9 10; do
+    for MBS in 6 10 12 15; do
         echo "Queuing: model=$MODEL mbs=$MBS $OFFLOAD_FLAG"
         ./launch.sh throughput "$MODEL" "$STEPS" "$NODES" "--mbs=$MBS" "$OFFLOAD_FLAG"
     done

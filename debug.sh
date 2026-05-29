@@ -1,0 +1,1 @@
+srun --account=lsaie-ss26 --environment=alps3 -p debug --pty bash

@@ -1,0 +1,1066 @@
+START TIME: Fri May 29 09:52:26 AM CEST 2026
+0: START TIME: Fri May 29 09:52:33 CEST 2026
+0: [Fri May 29 09:52:33 CEST 2026] WANDB enabled.
+0: CMD: torchrun --nproc-per-node 4 --nnodes 1 --rdzv_endpoint nid007031:25678 --rdzv_backend c10d --max_restarts 0 --tee 3 /users/course_00222/lsaie-ss26-gipfelsturm/Megatron-LM/pretrain_gpt.py     --transformer-impl transformer_engine --use-precision-aware-optimizer --main-grads-dtype bf16     --cpu-offloading-num-layers 23 --use-torch-optimizer-for-cpu-offload --overlap-cpu-optimizer-d2h-h2d     --num-layers 24 --hidden-size 1536 --ffn-hidden-size 4096 --num-attention-heads 16 --group-query-attention --num-query-groups 4 --max-position-embeddings 4096 --position-embedding-type rope --normalization RMSNorm --swiglu --untie-embeddings-and-output-weights --seq-length 4096     --micro-batch-size 16 --global-batch-size 256 --train-iters 50 --log-interval 1 --eval-interval 50 --eval-iters 0 --cross-entropy-loss-fusion --disable-bias-linear --optimizer adam --dataloader-type single --no-check-for-nan-in-loss-and-grad --manual-gc --manual-gc-interval 50     --attention-dropout 0.0 --hidden-dropout 0.0 --weight-decay 
+0: 0.1 --clip-grad 1.0 --adam-beta1 0.9 --adam-beta2 0.95     --lr 3e-4 --lr-decay-style constant --lr-warmup-iters 10     --seed 42 --init-method-std 0.02     --bf16     --tensor-model-parallel-size 1 --pipeline-model-parallel-size 1 --use-distributed-optimizer --overlap-grad-reduce --overlap-param-gather     --log-throughput --log-progress     --tokenizer-type GPT2BPETokenizer --vocab-file /users/course_00222/lsaie-ss26-gipfelsturm/data/gpt2-vocab.json --merge-file /users/course_00222/lsaie-ss26-gipfelsturm/data/gpt2-merges.txt     --data-path /capstor/store/cscs/swissai/infra01/datasets/nvidia/Nemotron-ClimbMix/climbmix_small_megatron/climbmix_small --data-cache-path /iopsstor/scratch/cscs/course_00222/gipfelsturm/cache --split 99,1,0 --num-workers 1         --wandb-save-dir /iopsstor/scratch/cscs/course_00222/gipfelsturm/gipfelsturm/throughput-760m-mbs16-offload-1n         --wandb-project gipfelsturm         --wandb-exp-name throughput-760m-mbs16-offload-1n-2421158
+0: [default0]:/usr/local/lib/python3.12/dist-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+0: [default0]:  Overriding a previously registered kernel for the same operator and the same dispatch key
+0: [default0]:  operator: flash_attn::_flash_attn_backward(Tensor dout, Tensor q, Tensor k, Tensor v, Tensor out, Tensor softmax_lse, Tensor(a6!)? dq, Tensor(a7!)? dk, Tensor(a8!)? dv, float dropout_p, float softmax_scale, bool causal, SymInt window_size_left, SymInt window_size_right, float softcap, Tensor? alibi_slopes, bool deterministic, Tensor? rng_state=None) -> Tensor
+0: [default0]:    registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:926
+0: [default0]:  dispatch key: ADInplaceOrView
+0: [default0]:  previous kernel: no debug info
+0: [default0]:       new kernel: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:926 (Triggered internally at /opt/pytorch/pytorch/aten/src/ATen/core/dispatch/Op
+0: eratorEntry.cpp:208.)
+0: [default0]:  self.m.impl(
+0: [default0]:/users/course_00222/lsaie-ss26-gipfelsturm/Megatron-LM/megatron/training/utils.py:411: UserWarning: Overriding default arguments for tokenizer_type:GPT2BPETokenizer with tokenizer_type:GPT2BPETokenizer
+0: [default0]:  warnings.warn(message)
+0: [default0]:using world size: 4, data-parallel size: 4, context-parallel size: 1, hierarchical context-parallel sizes: None, tensor-model-parallel size: 1, pipeline-model-parallel size: 1
+0: [default0]:Number of virtual stages per pipeline stage: None
+0: [default0]:using torch.bfloat16 for parameters ...
+0: [default0]:------------------------ arguments ------------------------
+0: [default0]:  account_for_embedding_in_pipeline_split ......... False
+0: [default0]:  account_for_loss_in_pipeline_split .............. False
+0: [default0]:  accumulate_allreduce_grads_in_fp32 .............. False
+0: [default0]:  activation_func_clamp_value ..................... None
+0: [default0]:  adam_beta1 ...................................... 0.9
+0: [default0]:  adam_beta2 ...................................... 0.95
+0: [default0]:  adam_eps ........................................ 1e-08
+0: [default0]:  add_bias_linear ................................. False
+0: [default0]:  add_position_embedding .......................... True
+0: [default0]:  add_qkv_bias ............
+0: ........................ False
+0: [default0]:  adlr_autoresume ................................. False
+0: [default0]:  adlr_autoresume_interval ........................ 1000
+0: [default0]:  align_grad_reduce ............................... True
+0: [default0]:  align_param_gather .............................. False
+0: [default0]:  allow_ambiguous_pad_tokens ...................... False
+0: [default0]:  app_tag_run_name ................................ None
+0: [default0]:  app_tag_run_version ............................. 0.0.0
+0: [default0]:  apply_query_key_layer_scaling ................... False
+0: [default0]:  apply_residual_connection_post_layernorm ........ False
+0: [default0]:  apply_rope_fusion ............................... True
+0: [default0]:  apply_wd_to_qk_layernorm ........................ False
+0: [default0]:  async_save ...................................... False
+0: [default0]:  async_tensor_model_parallel_allreduce ........... True
+0: [default0]:  attention_backend ............................... AttnBackend.auto
+0: [default0]:  attention_dropout ............................... 0.0
+0: [default0]:  attention_output_gate ........................... False
+0: [default0]:  attention_softmax_in_fp32 ....................... False
+0: [default0]:  auto_detect_ckpt_format ......................... False
+0: [default0]:  barrier_with_L1_time ............................ True
+0: [default0]:  batch_invariant_mode ............................ False
+0: [default0]:  bert_binary_head ................................ True
+0: [default0]:  bert_embedder_type .............................. megatron
+0: [default0]:  bert_load ....................................... None
+0: [default0]:  bf16 ............................................ True
+0: [default0]:  bias_dropout_fusion ............................. True
+0: [default0]:  bias_gelu_fusion ................................ False
+0: [default0]:  bias_swiglu_fusion ....................
+0: .......... True
+0: [default0]:  biencoder_projection_dim ........................ 0
+0: [default0]:  biencoder_shared_query_context_model ............ False
+0: [default0]:  block_data_path ................................. None
+0: [default0]:  cache_mla_latents ............................... False
+0: [default0]:  calc_ft_timeouts ................................ False
+0: [default0]:  calculate_per_token_loss ........................ False
+0: [default0]:  check_for_large_grads ........................... False
+0: [default0]:  check_for_nan_in_loss_and_grad .................. False
+0: [default0]:  check_for_spiky_loss ............................ False
+0: [default0]:  check_weight_hash_across_dp_replicas_interval ... None
+0: [default0]:  ckpt_assume_constant_structure .................. False
+0: [default0]:  ckpt_convert_format ............................. None
+0: [default0]:  ckpt_convert_save ............................... None
+0: [default0]:  ckpt_convert_update_legacy_dist_opt_format ...... False
+0: [default0]:  ckpt_format ..................................... torch_dist
+0: [default0]:  ckpt_fully_parallel_load ........................ False
+0: [default0]:  ckpt_fully_parallel_save ........................ True
+0: [default0]:  ckpt_fully_parallel_save_deprecated ............. False
+0: [default0]:  ckpt_step ....................................... None
+0: [default0]:  classes_fraction ................................ 1.0
+0: [default0]:  clip_grad ....................................... 1.0
+0: [default0]:  clone_scatter_output_in_embedding ...............
+0:  True
+0: [default0]:  config_logger_dir ............................... 
+0: [default0]:  consumed_train_samples .......................... 0
+0: [default0]:  consumed_valid_samples .......................... 0
+0: [default0]:  context_parallel_size ........................... 1
+0: [default0]:  cp_comm_type .................................... ['p2p']
+0: [default0]:  cpu_offloading .................................. True
+0: [default0]:  cpu_offloading_num_layers ....................... 23
+0: [default0]:  create_all_gather_group ......................... False
+0: [default0]:  create_attention_mask_in_dataloader ............. True
+0: [default0]:  cross_entropy_fusion_impl ....................... native
+0: [default0]:  cross_entropy_loss_fusion ....................... True
+0: [default0]:  cuda_graph_impl ................................. none
+0: [default0]:  cuda_graph_scope ................................ []
+0: [default0]:  cuda_graph_warmup_steps ......................... 3
+0: [default0]:  data_args_path .................................. None
+0: [default0]:  data_cache_path ................................. /iopsstor/scratch/cscs/course_00222/gipfelsturm/cache
+0: [default0]:  data_parallel_random_init ....................... False
+0: [default0]:  data_parallel_sharding_strategy ................. no_shard
+0: [default0]:  data_parallel_size .............................. 4
+0: [default0]:  data_path ....................................... ['/capstor/store/cscs/swissai/infra01/datasets/nvidia/Nemotron-ClimbMix/climbmix_small_megatron/climbmix_small']
+0: [default0]:  data_per_class_fraction ......................... 1.0
+0: [default0]:  data_sharding ................................... True
+0: [default0]:  dataloader_defer_npy_index_mmap ................. False
+0: [default0]:  dataloader_fast_cache_load ...................... False
+0: [default0]:  dataloader_type ................................. single
+0: [default0]:  ddp_average_in_collective ....................... False
+0: [default0]:  ddp_bucket_size ................................. None
+0: [default0]:  ddp_num_buckets ................................. None
+0: [default0]:  ddp_pad_buckets_for_high_nccl_busbw ............. False
+0: [default0]:  ddp_reduce_scatter_with_fp32_accumulation ....... False
+0: [default0]:  decode_only_cuda_graphs ......................... False
+0: [default0]:  decoder_first_pipeline_num_layers ............... None
+0: [default0]:  decoder_last_pipeline_num_layers ................ None
+0: [default0]:  decoder_num_layers .............................. None
+0: [default0]:  decoder_seq_length .............................. None
+0: [default0]:  decoupled_lr .................................... None
+0: [default0]:  decoupled_min_lr ................................ None
+0: [default0]:  decrease_batch_size_if_needed ................... False
+0: [default0]:  defer_embedding_wgrad_compute ................... False
+0: [default0]:  delay_wgrad_compute ............................. False
+0: [default0]:  deprecated_use_mcore_models ..................... False
+0: [default0]:  deterministic_mode .............................. False
+0: [default0]:  dino_bottleneck_size ............................ 256
+0: [default0]:  dino_freeze_last_layer .......................... 1
+0: [default0]:  dino_head_hidden_size ........................... 2048
+0: [default0]:  dino_local_crops_number ......................... 10
+0: [default0]:  dino_local_img_size ............................. 96
+0: [default0]:  dino_norm_last_layer ............................ False
+0: [default0]:  dino_teacher_temp ............................... 0.07
+0: [default0]:  dino_warmup_teacher_temp ........................ 0.04
+0: [default0]:  dino_warmup_teacher_temp_epochs ................. 30
+0: [default0]:  disable_bf16_reduced_precision_matmul ........... False
+0: [default0]:  disable_chunked_prefill ......................... True
+0: [default0]:  disable_jit_fuser ............................... False
+0: [default0]:  disable_straggler_on_startup .................... False
+0: [default0]:  disable_symmetric_registration .................. False
+0: [default0]:  dist_ckpt_format_deprecated ..................... None
+0: [default0]:  dist_ckpt_optim_fully_reshardable ............... False
+0: [default0]:  dist_ckpt_save_pre_mcore_014 .................... False
+0: [default0]:  dist_ckpt_strictness ............................ assume_ok_unexpected
+0: [default0]:  distrib_optim_fully_reshardable_mem_effi
+0: cient ... False
+0: [default0]:  distribute_saved_activations .................... False
+0: [default0]:  distributed_backend ............................. nccl
+0: [default0]:  distributed_timeout_minutes ..................... 10
+0: [default0]:  distributed_timeout_seconds_after_init .......... None
+0: [default0]:  dsa_indexer_head_dim ............................ None
+0: [default0]:  dsa_indexer_loss_coeff .......................... None
+0: [default0]:  dsa_indexer_n_heads ............................. None
+0: [default0]:  dsa_indexer_topk ................................ None
+0: [default0]:  dsa_indexer_use_sparse_loss ..................... False
+0: [default0]:  dump_param_to_param_group_map ................... None
+0: [default0]:  embedding_init_method_std ....................... None
+0: [default0]:  embedding_path .................................. None
+0: [default0]:  empty_unused_memory_level ....................... 0
+0: [default0]:  enable_cuda_graph ............................... False
+0: [default0]:  enable_experimental ............................. False
+0: [default0]:  enable_ft_package ............................... False
+0: [default0]:  enable_full_sharding_in_hsdp .................... False
+0: [default0]:  enable_gloo_process_groups ...................... True
+0: [default0]:  enable_gpt_oss .................................. False
+0: [default0]:  enable_msc ...................................... True
+0: [default0]:  enable_one_logger ............................... True
+0: [default0]:  encoder_num_layers .............................. 24
+0: [default0]:  encoder_seq_length .............................. 4096
+0: [default0]:  end_weight_decay ................................ 0.1
+0: [default0]:  eod_mask_loss ................................... False
+0: [default0]:  ep_overlap_early_attn_memory_release ............ False
+0: [default0]:  error_injection_rate ............................ 0
+0: [default0]:  error_injection_type ............................ transient_error
+0: [default0]:  eval_interval ..................................
+0: . 50
+0: [default0]:  eval_iters ...................................... 0
+0: [default0]:  evidence_data_path .............................. None
+0: [default0]:  exit_duration_in_mins ........................... None
+0: [default0]:  exit_interval ................................... None
+0: [default0]:  exit_on_missing_checkpoint ...................... False
+0: [default0]:  exit_signal ..................................... 15
+0: [default0]:  exit_signal_handler ............................. False
+0: [default0]:  exit_signal_handler_for_dataloader .............. False
+0: [default0]:  exp_avg_dtype ................................... torch.float32
+0: [default0]:  exp_avg_sq_dtype ................................ torch.float32
+0: [default0]:  experimental_attention_variant .................. None
+0: [default0]:  expert_model_parallel_size ...................... 1
+0: [default0]:  expert_tensor_parallel_size ..................... 1
+0: [default0]:  export_force_local_attention .................... False
+0: [default0]:  export_kd_cfg ................................... None
+0: [default0]:  export_kd_teacher_ckpt_format ................... None
+0: [default0]:  export_kd_teacher_load .......................... None
+0: [default0]:  export_kd_teacher_model_config .................. None
+0: [default0]:  export_kv_cache_quant ........................... none
+0: [default0]:  export_legacy_megatron .......................... False
+0: [default0]:  export_model_type ............................... GPTModel
+0: [default0]:  export_moe_apply_probs_on_input ................. False
+0: [default0]:  export_offline_model ............................ False
+0: [default0]:  export_qk_l2_norm ............................... False
+0: [default0]:  export_quant_cfg ................................ None
+0: [default0]:  export_real_quant_cfg ........................... None
+0: [default0]:  export_te_mcore_model ........................... False
+0: [default0]:  external_cuda_graph ............................. False
+0: [default0]:  fake_process_group .............................. False
+0: [default0]:  ffn_hidden_size ................................. 4096
+0: [default0]:  fim_data ........................................ False
+0: [default0]:  fim_eod_token ................................... <|endoftext|>
+0: [default0]:  fim_fragment_rate ............................... None
+0: [default0]:  fim_middle_token ................................ <fim_middle>
+0: [default0]:  fim_no_prefix ................................... None
+0: [default0]:  fim_pad_token ................................... <fim_pad>
+0: [default0]:  fim_prefix_token ................................ <fim_prefix>
+0: [default0]:  fim_rate ........................................ 0.5
+0: [default0]:  fim_split_sample ................................ None
+0: [default0]:  fim_spm_rate .................................... 0.5
+0: [default0]:  fim_suffix_token ................................ <fim_suffix>
+0: [default0]:  fine_grained_activation_offloading .............. False
+0: [default0]:  finetune ........................................ False
+0: [default0]:  finetune_data_split ............................. train
+0: [default0]:  finetune_hf_dataset ............................. None
+0: [default0]:  first_last_layers_bf16 .......................... False
+0: [default0]:  flash_decode .................................... False
+0: [default0]:  fp16 ............................................ False
+0: [default0]:  fp16_lm_cross_entropy ........................... False
+0: [default0]:  fp32_residual_connection ........................ False
+0: [default0]:  fp4 ............................................. None
+0: [default0]:  fp4_param ....................................... False
+0: [default0]:  fp4_quantizer_factory ........................... None
+0: [default0]:  fp4_recipe ...................................... nvfp4
+0: [default0]:  fp8 ............................................. None
+0: [default0]:  fp8_amax_compute_algo ........................... most_recent
+0: [default0]:  fp8_amax_history_len ............................ 1
+0: [default0]:  fp8_interval .................................... 1
+0: [default0]:  fp8_margin ...................................... 0
+0: [default0]:  fp8_param_gather ................................ False
+0: [default0]:  fp8_quantizer_factory ........................... None
+0: [default0]:  fp8_recipe ...................................... delayed
+0: [default0]:  fp8_wgrad ....................................... True
+0: [default0]:  fsdp_double_buffer .............................. False
+0: [default0]:  fsdp_manual_registration ........................ False
+0: [default0]:  ft_num_warmup_iters ............................. 5
+0: [default0]:  full_validation ................................. False
+0: [default0]:  global_batch_size ............................... 256
+0: [default0]:  glu_linear_offset ............................... 0.0
+0: [default0]:  grad_reduce_in_bf16 ............................. False
+0: [default0]:  gradient_accumulation_fusion .................... True
+0: [default0]:  gradient_reduce_div_fusion ...................... True
+0: [default0]:  group_query_attention ........................... True
+0: [default0]:  grpo_clamp_eps_lower ............................ 0.01
+0: [default0]:  grpo_clamp_eps_upper ............................ 0.01
+0: [default0]:  grpo_entropy_term_weight ........................ 0.0
+0: [default0]:  grpo_filter_groups_with_same_reward ............. False
+0: [default0]:  grpo_group_size ................................. 2
+0: [default0]:  grpo_iterations ................................. 2
+0: [default0]:  grpo_kl_beta .................................... 0.001
+0: [default0]:  grpo_prompts_per_step ........................... 32
+0: [default0]:  head_lr_mult .................................... 1.0
+0: [default0]:  heterogeneous_layers_config_encoded_json ........ None
+0: [default0]:  heterogeneous_layers_config_path ................ None
+0: [default0]:  hidden_dropout .................................. 0.0
+0: [default0]:  hidden_size ..................................... 1536
+0: [default0]:  hierarchical_context_parallel_sizes ............. None
+0: [default0]:  high_priority_stream_groups ..................... []
+0: [default0]:  hybrid_attention_ratio .......................... 0.0
+0: [default0]:  hybrid_context_parallel ......................... False
+0: [default0]:  hybrid_mlp_ratio ................................ 0.0
+0: [default0]:  hybrid_override_pattern ......................... None
+0: [default0]:  hysteresis ...................................... 2
+0: [default0]:  ict_head_size ................................... None
+0: [default0]:  ict_load ........................................ None
+0: [default0]:  img_h ........................................... 224
+0: [default0]:  img_w ........................................... 224
+0: [default0]:  indexer_batch_size .............................. 128
+0: [default0]:  indexer_log_interval ............................ 1000
+0: [default0]:  inference_batch_times_seqlen_threshold .......... -1
+0: [default0]:  inference_coordinator_port ...................... 12346
+0: [default0]:  inference_dynamic_batching ...................... False
+0: [default0]:  inference_dynamic_batching_block_size ........... 256
+0: [default0]:  inference_dynamic_batching_buffer_size_gb ....... 40.0
+0: [default0]:  inference_dynamic_batching_cuda_graph_max_tokens  16384
+0: [default0]:  inference_dynamic_batching_cuda_graph_mixed_prefill_count  16
+0: [default0]:  inference_dynamic_batching_max_requests ......... None
+0: [default0]:  inference_dynamic_batching_max_tokens ........... None
+0: [default0]:  inference_dynamic_batching_num_cuda_graphs ...... 16
+0: [default0]:  inference_dynamic_batching_paused_buffer_size_gb  None
+0: [default0]:  inference_dynamic_batching_track_paused_request_events  False
+0: [default0]:  inference_dynamic_batching_unified_memory_level . 0
+0: [default0]:  inference_fuse_tp_communication ................. False
+0: [default0]:  inference_logging_step_interval ................. 0
+0: [default0]:  inference_max_batch_size ........................ 8
+0: [default0]:  inference_max_seq_length ........................ 2560
+0: [default0]:  inference_rng_tracker ........................... False
+0: [default0]:  inference_wandb_logging ......................... False
+0: [default0]:  init_method_std ................................. 0.02
+0: [default0]:  init_method_xavier_uniform ...................... False
+0: [default0]:  init_model_with_meta_device ..................... False
+0: [default0]:  initial_loss_scale .............................. 4294967296
+0: [default0]:  inprocess_active_world_size ..................... 4
+0: [default0]:  inprocess_barrier_timeout ....................... 120
+0: [default0]:  inprocess_completion_timeout .................... 120
+0: [default0]:  inprocess_empty_cuda_cache ...................... False
+0: [default0]:  inprocess_granularity ........................... node
+0: [default0]:  inprocess_hard_timeout .......................... 90
+0: [default0]:  inprocess_heartbeat_interval .................... 30
+0: [default0]:  inprocess_heartbeat_timeout ..................... 60
+0: [default0]:  inprocess_last_call_wait ........................ 1
+0: [default0]:  inprocess_max_iterations ........................ None
+0: [default0]:  inprocess_monitor_process_interval .............. 1.0
+0: [default0]:  inprocess_monitor_thread_interval ............... 1.0
+0: [default0]:  inprocess_progress_watchdog_interval ............ 1.0
+0: [default0]:  inprocess_restart ............................... False
+0: [default0]:  inprocess_soft_timeout .......................... 60
+0: [default0]:  inprocess_termination_grace_time ................ 1
+0: [default0]:  is_hybrid_model ................................. False
+0: [default0]:  iter_per_epoch .................................. 1250
+0: [default0]:  iterations_to_skip .............................. []
+0: [default0]:  keep_fp8_transpose_cache ........................ False
+0: [default0]:  kitchen_attention_backend ....................... sdpa
+0: [default0]:  kv_channels ..................................... 96
+0: [default0]:  kv_lora_rank .................................... 32
+0: [default0]:  langrl_env_config ............................... None
+0: [default0]:  langrl_external_server .......................... False
+0: [default0]:  langrl_inference_server_conversation_template ... None
+0: [default0]:  langrl_inference_server_type .................... inplace_megatron
+0: [default0]:  layernorm_epsilon ............................... 1e-05
+0: [default0]:  layernorm_zero_centered_gamma ................... False
+0: [default0]:  lazy_mpu_init ................................... None
+0: [default0]:  legacy_tokenizer ................................ False
+0: [default0]:  linear_attention_freq ........................... None
+0: [default0]:  linear_conv_kernel_dim .......................... 4
+0: [default0]:  linear_key_head_dim ............................. 128
+0: [default0]:  linear_num_key_heads ............................ 16
+0: [default0]:  linear_num_value_heads .......................... 32
+0: [default0]:  linear_value_head_dim ........................... 128
+0: [default0]:  load ............................................ None
+0: [default0]:  load_main_params_from_ckpt ...................... False
+0: [default0]:  local_rank ...................................... 0
+0: [default0]:  log_device_memory_used .......................... False
+0: [default0]:  log_energy ...................................... False
+0: [default0]:  log_interval .................................... 1
+0: [default0]:  log_loss_scale_to_tensorboard ................... True
+0: [default0]:  log_max_attention_logit ......................... False
+0: [default0]:  log_memory_interval ............................. None
+0: [default0]:  log_memory_to_tensorboard ....................... False
+0: [default0]:  log_num_zeros_in_grad ........................... False
+0: [default0]:  log_params_norm ................................. False
+0: [default0]:  log_progress .................................... True
+0: [default0]:  log_straggler ................................... False
+0: [default0]:  log_throughput .................................. True
+0: [default0]:  log_timers_to_tensorboard ....................... False
+0: [default0]:  log_validation_ppl_to_tensorboard ............... False
+0: [default0]:  log_world_size_to_tensorboard ................... False
+0: [default0]:  logging_level ................................... None
+0: [default0]:  loss_scale ...................................... None
+0: [default0]:  loss_scale_window ............................... 1000
+0: [default0]:  lr .............................................. 0.0003
+0: [default0]:  lr_decay_iters .................................. None
+0: [default0]:  lr_decay_samples ................................ None
+0: [default0]:  lr_decay_style .................................. constant
+0: [default0]:  lr_warmup_fraction .............................. None
+0: [default0]:  lr_warmup_init .................................. 0.0
+0: [default0]:  lr_warmup_iters ................................. 10
+0: [default0]:  lr_warmup_samples ............................... 0
+0: [default0]:  lr_wsd_decay_iters .............................. None
+0: [default0]:  lr_wsd_decay_samples ............................ None
+0: [default0]:  lr_wsd_decay_style .............................. exponential
+0: [default0]:  main_grads_dtype ................................ torch.bfloat16
+0: [default0]:  main_params_dtype ............................... torch.float32
+0: [default0]:  make_vocab_size_divisible_by .................... 128
+0: [default0]:  mamba_head_dim .................................. 64
+0: [default0]:  mamba_num_groups ................................ 8
+0: [default0]:  mamba_num_heads ................................. None
+0: [default0]:  mamba_state_dim ................................. 128
+0: [default0]:  manual_gc ....................................... True
+0: [default0]:  manual_gc_eval .................................. True
+0: [default0]:  manual_gc_interval .............................. 50
+0: [default0]:  mask_factor ..................................... 1.0
+0: [default0]:  mask_prob ....................................... 0.15
+0: [default0]:  mask_type ....................................... random
+0: [default0]:  masked_softmax_fusion ........................... True
+0: [default0]:  max_position_embeddings ......................... 4096
+0: [default0]:  max_seqlen_per_dp_cp_rank ....................... None
+0: [default0]:  max_tokens_to_oom ............................... 12000
+0: [default0]:  memory_snapshot_path ............................ snapshot.pickle
+0: [default0]:  merge_file ...................................... /users/course_00222/lsaie-ss26-gipfelsturm/data/gpt2-merges.txt
+0: [default0]:  micro_batch_size ................................ 16
+0: [default0]:  microbatch_group_size_per_vp_stage .............. None
+0: [default0]:  mid_level_dataset_surplus ....................... 0.005
+0: [default0]:  min_loss_scale .................................. 1.0
+0: [default0]:  min_lr .......................................... 0.0
+0: [default0]:  min_offloaded_tensor_size ....................... 1048576
+0: [default0]:  mlp_chunks_for_prefill .......................... 1
+0: [default0]:  mmap_bin_files .................................. True
+0: [default0]:  mock_data ....................................... False
+0: [default0]:  modelopt_enabled ................................ False
+0: [default0]:  moe_apply_probs_on_input ........................ False
+0: [default0]:  moe_aux_loss_coeff .............................. 0.0
+0: [default0]:  moe_deepep_num_sms .............................. 20
+0: [default0]:  moe
+0: _enable_deepep ............................... False
+0: [default0]:  moe_enable_routing_replay ....................... False
+0: [default0]:  moe_expert_capacity_factor ...................... None
+0: [default0]:  moe_extended_tp ................................. False
+0: [default0]:  moe_ffn_hidden_size ............................. None
+0: [default0]:  moe_flex_dispatcher_backend ..................... deepep
+0: [default0]:  moe_grouped_gemm ................................ False
+0: [default0]:  moe_hybridep_num_sms ............................ 16
+0: [default0]:  moe_input_jitter_eps ............................ None
+0: [default0]:  moe_latent_size ................................. None
+0: [default0]:  moe_layer_freq .................................. 1
+0: [default0]:  moe_layer_recompute ............................. False
+0: [default0]:  moe_pad_expert_input_to_capacity ................ False
+0: [default0]:  moe_pad_experts_for_cuda_graph_inference ........ False
+0: [default0]:  moe_per_layer_logging ........................... False
+0: [default0]:  moe_permute_fusion .............................. False
+0: [default0]:  moe_router_bias_update_rate ..................... 0.001
+0: [default0]:  moe_router_dtype ................................ None
+0: [default0]:  moe_router_enable_expert_bias ................... False
+0: [default0]:  moe_router_force_load_balancing ................. False
+0: [default0]:  moe_router_fusion ............................... False
+0: [default0]:  moe_router_group_topk ........................... None
+0: [default0]:  moe_router_load_balancing_type .................. aux_loss
+0: [default0]:  moe_router_num_groups ........................... None
+0: [default0]:  moe_router_padding_for_fp8 ...................... False
+0: [default0]:  moe_router_padding_for_quantization ............. False
+0: [default0]:  moe_router_pre_softmax .......................... False
+0: [default0]:  moe_router_score_function ....................... softmax
+0: [default0]:  moe_router_topk ................................. 2
+0: [default0]:  moe_router_topk_scaling_factor .................. None
+0: [default0]:  moe_shared_expert_gate .......................... False
+0: [default0]:  moe_shared_expert_intermediate_size ............. None
+0: [default0]:  moe_shared_expert_overlap ....................... False
+0: [default0]:  moe_token_dispatcher_type ....................... allgather
+0: [default0]:  moe_token_drop_policy ........................... probs
+0: [default0]:  moe_upcycling_granularity ....................... 1
+0: [default0]:  moe_use_legacy_grouped_gemm ..................... False
+0: [default0]:  moe_use_upcycling ............................... False
+0: [default0]:  moe_z_loss_coeff ................................ None
+0: [default0]:  mrope_section ................................... None
+0: [default0]:  mscale .......................................... 1.0
+0: [default0]:  mscale_all_dim .................................. 0.0
+0: [default0]:  mtp_loss_scaling_factor ......................... 0.1
+0: [default0]:  mtp_num_layers .................................. None
+0: [default0]:  mtp_standalone .................................. False
+0: [default0]:  multi_latent_attention .......................... False
+0: [default0]:  multiple_validation_sets ........................ False
+0: [default0]:  muon_extra_scale_factor ......................... 1.0
+0: [default0]:  muon_fp32_matmul_prec ........................... medium
+0: [default0]:  muon_momentum ................................... 0.9
+0: [default0]:  muon_num_ns_steps ............................... 5
+0: [default0]:  muon_scale_mode ................................. spectral
+0: [default0]:  muon_split_qkv .................................. True
+0: [default0]:  muon_tp_mode .................................... blockwise
+0: [default0]:  muon_use_nesterov ............................... False
+0: [default0]:  nccl_all_reduce_for_prefill ..................... False
+0: [default0]:  nccl_communicator_config_path ................... None
+0: [default0]:  nccl_ub ......................................... False
+0: [default0]:  no_load_optim ................................... None
+0: [default0]:  no_load_rng ..................................... None
+0: [default0]:  no_persist_layer_norm ...........................
+0:  False
+0: [default0]:  no_rope_freq .................................... None
+0: [default0]:  no_save_optim ................................... None
+0: [default0]:  no_save_rng ..................................... None
+0: [default0]:  no_weight_decay_cond_type ....................... None
+0: [default0]:  non_persistent_ckpt_type ........................ None
+0: [default0]:  non_persistent_global_ckpt_dir .................. None
+0: [default0]:  non_persistent_local_ckpt_algo .................. fully_parallel
+0: [default0]:  non_persistent_local_ckpt_dir ................... None
+0: [default0]:  non_persistent_save_interval .................... None
+0: [default0]:  normalization ................................... RMSNorm
+0: [default0]:  num_attention_heads ............................. 16
+0: [default0]:  num_channels .................................... 3
+0: [default0]:  num_classes ..................................... 1000
+0: [default0]:  num_dataset_builder_threads ..................... 1
+0: [default0]:  num_distributed_optimizer_instances ............. 1
+0: [default0]:  num_experts ..................................... None
+0: [default0]:  num_layers ...................................... 24
+0: [default0]:  num_layers_at_end_in_bf16 ....................... 1
+0: [default0]:  num_layers_at_start_in_bf16 ..................... 1
+0: [default0]:  num_layers_per_virtual_pipeline_stage ........... None
+0: [default0]:  num_query_groups ................................ 4
+0: [default0]:  num_virtual_stages_per_pipeline_rank ............ None
+0: [default0]:  num_workers ..................................... 1
+0: [default0]:  object_storage_cache_path ....................... None
+0: [default0]:  offload_modules ................................. []
+0: [default0]:  one_logger_async ................................ False
+0: [default0]:  one_logger_project .............................. megatron-lm
+0: [default0]:  one_logger_run_name ............................. None
+0: [default0]:  onnx_safe ....................................... None
+0: [default0]:  openai_gelu ..................................... False
+0: [default0]:  optimizer ....................................... adam
+0: [default0]:  optimizer_cpu_offload ........................... False
+0: [default0]:  optimizer_offload_fraction ...................... 1.0
+0: [default0]:  outer_dp_sharding_strategy ...................... no_shard
+0: [default0]:  output_bert_embeddings .......................... False
+0: [default0]:  overlap_cpu_optimizer_d2h_h2d ................... True
+0: [default0]:  overlap_grad_reduce ............................. True
+0: [default0]:  overlap_moe_expert_parallel_comm ................ False
+0: [default0]:  overlap_p2p_comm ................................ False
+0: [default0]:  overlap_p2p_comm_warmup_flush ................... False
+0: [default0]:  overlap_param_gather ............................ True
+0: [default0]:  overlap_param_gather_with_optimizer_step ........ False
+0: [default0]:  override_opt_param_scheduler .................... False
+0: [default0]:  padded_vocab_size ............................... None
+0: [default0]:  params_dtype .................................... torch.bfloat16
+0: [default0]:  patch_dim ....................................... 16
+0: [default0]:  per_dataset_sequences_path ...................... None
+0: [default0]:  per_split_data_args_path ........................ None
+0: [default0]:  perform_initialization .......................... True
+0: [default0]:  perform_rl_step ................................. False
+0: [default0]:  phase_transition_iterations ..................... None
+0: [default0]:  pin_cpu_grads ................................... True
+0: [default0]:  pin_cpu_params .................................. True
+0: [default0]:  pipeline_model_parallel_comm_backend ............ None
+0: [default0]:  pipeline_model_parallel_layout .................. None
+0: [default0]:  pipeline_model_parallel_size .................... 1
+0: [default0]:  position_embedding_type ......................... rope
+0: [default0]:  pretrained_checkpoint ........................... None
+0: [default0]:  profile ......................................... False
+0: [default0]:  profile_ranks ................................... [0]
+0: [default0]:  profile_step_end ................................ 12
+0: [default0]:  profile_step_start .............................. 10
+0: [default0]:  q_lora_rank ..................................... None
+0: [default0]:  qk_clip ......................................... False
+0: [default0]:  qk_clip_alpha ................................... 0.5
+0: [default0]:  qk_clip_threshold ............................... 100
+0: [default0]:  qk_head_dim ..................................... 128
+0: [default0]:  qk_l2_norm ...................................... False
+0: [default0]:  qk_layernorm .................................... False
+0: [default0]:  qk_pos_emb_head_dim ............................. 64
+0: [default0]:  query_in_block_prob ............................. 0.1
+0: [default0]:  quick_geglu ..................................... False
+0: [default0]:  rampup_batch_size ............................... None
+0: [default0]:  rank ............................................ 0
+0: [default0]:  recompute_granularity ........................... None
+0: [default0]:  recompute_method ................................ None
+0: [default0]:  recompute_modules ............................... None
+0: [default0]:  recompute_num_layers ............................ None
+0: [default0]:  record_memory_history ........................... False
+0: [default0]:  refit_method .................................... gloo
+0: [default0]:  relative_attention_max_distance ................. 128
+0: [default0]:  relative_attention_num_buckets .................. 32
+0: [default0]:  replication ..................................... False
+0: [default0]:  replication_factor .............................. 2
+0: [default0]:  replication_jump ................................ None
+0: [default0]:  rerun_mode ...................................... validate_results
+0: [default0]:  reset_attention_mask ............................ False
+0: [default0]:  reset_position_ids .............................. False
+0: [default0]:  result_rejected_tracker_filename ................ None
+0: [default0]:  retriever_report_topk_accuracies ................ []
+0: [default0]:  retriever_score_scaling ......................... False
+0: [default0]:  reuse_grad_buf_for_mxfp8_param_ag ............... False
+0: [default0]:  rl_default_temperature .......................... 1.0
+0: [default0]:  rl_default_top_k ................................ -
+0: 1
+0: [default0]:  rl_default_top_p ................................ 0
+0: [default0]:  rl_importance_sampling_truncation_coef .......... None
+0: [default0]:  rl_inference_expert_model_parallel_size ......... None
+0: [default0]:  rl_inference_expert_tensor_model_parallel_size .. None
+0: [default0]:  rl_inference_logprobs_is_correction ............. False
+0: [default0]:  rl_inference_model_unified_memory_level ......... 0
+0: [default0]:  rl_inference_pipeline_model_parallel_size ....... None
+0: [default0]:  rl_inference_tensor_model_parallel_size ......... None
+0: [default0]:  rl_offload_inference_model_weights_when_idle .... False
+0: [default0]:  rl_offload_kv_cache_during_training ............. False
+0: [default0]:  rl_offload_optimizer_during_inference ........... False
+0: [default0]:  rl_parallel_generation_tasks .................... 512
+0: [default0]:  rl_partial_rollouts ............................. False
+0: [default0]:  rl_prompts_per_eval ............................. 32
+0: [default0]:  rl_remove_kv_cache_during_training .............. False
+0: [default0]:  rl_reset_cuda_graphs ............................ False
+0: [default0]:  rl_sequence_packing_algo ........................ fifo
+0: [default0]:  rl_sequence_packing_max_sequences_per_bin ....... 50
+0: [default0]:  rl_skip_bos_token ............................... False
+0: [default0]:  rl_training_cuda_graphs ......................... False
+0: [default0]:  rl_use_sequence_packing ......................... False
+0: [default0]:  rl_verify_model_weights_swap .................... False
+0: [default0]:  rope_scaling_factor ............................. 8.0
+0: [default0]:  rope_type ....................................... None
+0: [default0]:  rotary_base ..................................... 10000
+0: [default0]:  rotary_interleaved .............................. False
+0: [default0]:  rotary_percent .................................. 1.0
+0: [default0]:  rotary_scaling_factor ........................... 1.0
+0: [default0]:  rotary_seq_len_interpolation_factor ............. None
+0: [default0]:  run_workload_inspector_server ................... False
+0: [default0]:  sample_rate ..................................... 1.0
+0: [default0]:  save ............................................ None
+0: [default0]:  save_dgrads_interval ............................ None
+0: [default0]:  save_interval ................................... None
+0: [default0]:  save_retain_interval ............................ None
+0: [default0]:  save_wgrads_interval ............................ None
+0: [default0]:  scatter_gather_tensors_in_pipeline .............. True
+0: [default0]:  seed ............................................ 42
+0: [default0]:  seq_length ...................................... 4096
+0: [default0]:  sequence_parallel ............................... False
+0: [default0]:  sft ............................................. False
+0: [default0]:  sft_tokenizer_prompt_format ..................... nemotron-h-aligned
+0: [default0]:  sgd_momentum .................................... 0.9
+0: [default0]:  sharp_enabled_group ............................. None
+0: [default0]:  short_seq_prob .................................. 0.1
+0: [default0]:  skip_train ...................................... False
+0: [default0]:  skipped_train_samples ........................... 0
+0: [default0]:  softmax_type .................................... vanilla
+0: [default0]:  spec ............................................ None
+0: [default0]:  split ........................................... 99,1,0
+0: [default0]:  squared_relu .................................... False
+0: [default0]:  start_weight_decay .............................. 0.1
+0: [default0]:  straggler_ctrlr_port ............................ 65535
+0: [default0]:  straggler_minmax_count .......................... 1
+0: [default0]:  strict_fsdp_dtensor_load ........................ True
+0: [default0]:  suggested_communication_unit_size ............... None
+0: [default0]:  swiglu .......................................... True
+0: [default0]:  swin_backbone_type .............................. tiny
+0: [default0]:  symmetric_ar_type ............................... None
+0: [default0]:  te_precision_config_file ........................ None
+0: [de
+0: fault0]:  te_rng_tracker .................................. False
+0: [default0]:  tensor_model_parallel_size ...................... 1
+0: [default0]:  tensorboard_dir ................................. None
+0: [default0]:  tensorboard_log_interval ........................ 1
+0: [default0]:  tensorboard_queue_size .......................... 1000
+0: [default0]:  test_data_path .................................. None
+0: [default0]:  test_mode ....................................... False
+0: [default0]:  tiktoken_num_special_tokens ..................... 1000
+0: [default0]:  tiktoken_pattern ................................ None
+0: [default0]:  tiktoken_special_tokens ......................... None
+0: [default0]:  timing_log_level ................................ 0
+0: [default0]:  timing_log_option ............................... minmax
+0: [default0]:  titles_data_path ................................ None
+0: [default0]:  tokenizer_hf_include_special_tokens ............. False
+0: [default0]:  tokenizer_hf_use_fast ........................... False
+0: [default0]:  tokenizer_metadata .............................. None
+0: [default0]:  tokenizer_model ................................. None
+0: [default0]:  tokenizer_sentencepiece_legacy .................. False
+0: [default0]:  tokenizer_special_tokens ........................ None
+0: [default0]:  tokenizer_type .................................. GPT2BPETokenizer
+0: [default0]:  torch_fsdp2_reshard_after_forward ............... True
+0: [default0]:  tp_comm_bootstrap_backend ...................
+0: .... nccl
+0: [default0]:  tp_comm_bulk_dgrad .............................. True
+0: [default0]:  tp_comm_bulk_wgrad .............................. True
+0: [default0]:  tp_comm_overlap ................................. False
+0: [default0]:  tp_comm_overlap_ag .............................. True
+0: [default0]:  tp_comm_overlap_cfg ............................. None
+0: [default0]:  tp_comm_overlap_rs .............................. True
+0: [default0]:  tp_comm_overlap_rs_dgrad ........................ False
+0: [default0]:  tp_comm_split_ag ................................ True
+0: [default0]:  tp_comm_split_rs ................................ True
+0: [default0]:  train_data_path ................................. None
+0: [default0]:  train_iters ..................................... 50
+0: [default0]:  train_samples ................................... None
+0: [default0]:  train_sync_interval ............................. None
+0: [default0]:  transformer_impl ................................ transformer_engine
+0: [default0]:  transformer_pipeline_model_parallel_size ........ 1
+0: [default0]:  trust_remote_code ............................... False
+0: [default0]:  untie_embeddings_and_output_weights ............. True
+0: [default0]:  use_checkpoint_args ............................. False
+0: [default0]:  use_checkpoint_opt_param_scheduler .............. False
+0: [default0]:  use_cpu_initialization .......................... None
+0: [default0]:  use_dist_ckpt ................................... True
+0: [default0]:  use_dist_ckpt_deprecated ........................ False
+0: [default0]:  use_distributed_optimizer ....................... True
+0: [default0]:  use_flash_attn .................................. False
+0: [default0]:  use_fused_weighted_squared_relu ................. False
+0: [default0]:  use_kitchen_attention ........................... False
+0: [default0]:  use_legacy_models ............................... False
+0: [default0]:  use_legacy_static_engine ........................ False
+0: [default0]:  use_mamba_mem_eff_path .......................... True
+0: [default0]:  use_megatron_fsdp ............................... False
+0: [default0]:  use_mp_args_from_checkpoint_args ................ False
+0: [default0]:  use_one_sent_docs ............................... False
+0: [default0]:  use_persistent_ckpt_worker ...................... False
+0: [default0]:  use_precision_aware_optimizer ................... True
+0: [default0]:  use_pytorch_profiler ............................ False
+0: [default0]:  use_ring_exchange_p2p ........................... False
+0: [default0]:  use_rope_scaling ................................ False
+0: [default0]:  use_rotary_position_embeddings .................. False
+0: [default0]:  use_sharp ....................................... False
+0: [default0]:  use_te_activation_func .......................... False
+0: [default0]:  use_tokenizer_model_from_checkpoint_args ........ True
+0: [default0]:  use_torch_fsdp2 ................................. False
+0: [default0]:  use_torch_optimizer_for_cpu_offload ............. True
+0: [default0]:  use_tp_pp_dp_mapping ............................ False
+0: [default0]:  v_head_dim ...................................... 128
+0: [default0]:  valid_data_path ................................. None
+0: [default0]:  variable_seq_lengths ............................ False
+0: [default0]:  virtual_pipeline_model_parallel_size ............ None
+0: [default0]:  vision_backbone_type ............................ vit
+0: [default0]:  vision_pretraining .............................. False
+0: [default0]:  vision_pretraining_type ......................... classify
+0: [default0]:  vocab_extra_ids ................................. 0
+0: [default0]:  vocab_file ...................................... /users/course_00222/lsaie-ss26-gipfelsturm/data/gpt2-vocab.json
+0: [default0]:  vocab_size ...................................... None
+0: [default0]:  wandb_entity .................................... None
+0: [default0]:  wandb_exp_name .................................. throughput-760m-mbs16-offload-1n-2421158
+0: [default0]:  wandb_project ................................... gipfelsturm
+0: [default0]:  wandb_save_dir .................................. /iopsstor/scratch/cscs/course_00222/gipfelsturm/gipfelsturm/throughput-760m-mbs16-offload-1n
+0: [default0]:  weight_decay .................................... 0.1
+0: [default0]:  weight_decay_incr_style ......................... constant
+0: [default0]:  wgrad_deferral_limit ............................ 0
+0: [default0]:  window_attn_skip_freq ........................... None
+0: [default0]:  window_size ..................................... None
+0: [default0]:  world_size ...................................... 4
+0: [default0]:  yaml_cfg ........................................ None
+0: [default0]:-------------------- end of arguments ---------------------
+0: [default0]:INFO:megatron.core.num_microbatches_calculator:setting number of microbatches to constant 4
+0: [default0]:> building GPT2BPETokenizer tokenizer ...
+0: [default0]:WARNING:megatron.core.datasets.megatron_tokenizer:You're using the legacy tokenizer system, which is deprecated and will be removed in a future release. Please migrate to the new tokenizer system (`megatron.core.tokenizers.MegatronTokenizer`).
+0: [default0]: > padded vocab (size: 50257) with 47 dummy tokens (new size: 50304)
+0: [default0]:WARNING:megatron.core.rerun_state_machine:RerunStateMachine initialized in mode RerunMode.VALIDATE_RESULTS
+0: [default0]:> initializing torch distributed ...
+0: [default1]:[W529 09:53:01.832584141 ProcessGroupNCCL.cpp:941] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+0: [default3]:wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+0: [default2]:[W529 09:53:01.836253959 ProcessGroupNCCL.cpp:941] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+0: [default3]:wandb: Currently logged in as: hannes-eberhard (hannes-eberhard-eth-z-rich) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+0: [default3]:wandb: setting up run ti1cmwpi
+0: [default3]:wandb: Tracking run with wandb version 0.25.0
+0: [default3]:wandb: Run data is saved locally in /iopsstor/scratch/cscs/course_00222/gipfelsturm/gipfelsturm/throughput-760m-mbs16-offload-1n/wandb/run-20260529_095301-ti1cmwpi
+0: [default3]:wandb: Run `wandb offline` to turn off syncing.
+0: [default3]:wandb: Syncing run throughput-760m-mbs16-offload-1n-2421158
+0: [default3]:wandb: ⭐️ View project at https://wandb.ai/hannes-eberhard-eth-z-rich/gipfelsturm
+0: [default3]:wandb: 🚀 View run at https://wandb.ai/hannes-eberhard-eth-z-rich/gipfelsturm/runs/ti1cmwpi
+0: [default3]:WARNING: one_logger package is required to enable e2e metrics tracking. please go to https://confluence.nvidia.com/display/MLWFO/Package+Repositories for details to install it
+0: [default3]:[W529 09:53:02.485361493 ProcessGroupNCCL.cpp:941] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+0: [default3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default0]:[W529 09:53:06.841305581 ProcessGroupNCCL.cpp:941] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+0: [default0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+0: [default0]:> initialized tensor model parallel with size 1
+0: [default0]:> initialized pipeline model parallel with size 1
+0: [default0]:> setting random seeds to 42 ...
+0: [default0]:> compiling dataset index builder ...
+0: [default0]:/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+0: [default0]:  return func(*args, **kwargs)
+0: [default0]:[rank0]:[W529 09:53:11.985151389 ProcessGroupNCCL.cpp:5163] Guessing device ID based on global rank. This can cause a hang if rank to GPU mapping is heterogeneous. You can specify device_id in init_process_group()
+0: [default0]:make: Entering directory '/users/course_00222/lsaie-ss26-gipfelsturm/Megatron-LM/megatron/core/datasets'
+0: [default0]:make: Nothing to be done for 'default'.
+0: [default0]:make: Leaving directory '/users/course_00222/lsaie-ss26-gipfelsturm/Megatron-LM/megatron/core/datasets'
+0: [default0]:>>> done with dataset index builder. Compilation time: 0.084 seconds
+0: [default0]:> compiling and loading fused kernels ...
+0: [default0]:>>> done with compiling and loading fused kernels. Compilation time: 2.543 seconds
+0: [default0]:/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+0: [default0]:  return func(*args, **kwargs)
+0: [default3]:INFO:megatron.core.timers:(min, max) time across ranks (ms):
+0: [default3]:    startup-program-entry-spread ...................: (0.26, 0.31)
+0: [default3]:    startup-library-setup ..........................: (22012.74, 22013.06)
+0: [default3]:    startup-program-setup ..........................: (60.96, 61.03)
+0: [default3]:    startup-in-process-setup .......................: (0.00, 0.00)
+0: [default3]:    startup-in-job-setup ...........................: (32.73, 33.23)
+0: [default3]:    startup-initialize-megatron ....................: (12919.38, 12920.13)
+0: [default3]:    startup-set-jit-fusion-options .................: (2147.04, 2675.37)
+0: [default3]:    all-reduce-start-timestamps-tensor .............: (1.57, 529.68)
+0: [default3]:    startup-megatron-init-local ....................: (15629.56, 15629.62)
+0: [default3]:    startup-megatron-init-global ...................: (37703.59, 37703.64)
+0: [default0]:time to initialize megatron (seconds): 16.222
+0: [default0]:[after in-process setup and before initialize_megatron] datetime: 2026-05-29 09:53:01.032907 
+0: [default0]:[after in-job setup and before initialize_megatron] datetime: 2026-05-29 09:53:01.065641 
+0: [default0]:[before library-setup] datetime: 2026-05-29 09:52:38.959148
+0: [default0]:[after library-setup] datetime: 2026-05-29 09:53:00.971944
+0: [default0]:[before megatron-init] datetime: 2026-05-29 09:53:01.032907
+0: [default0]:[after megatron is initialized] datetime: 2026-05-29 09:53:16.664852 
+0: [default0]:building GPT model ...
+0: [default0]: > number of parameters on (tensor, pipeline) model parallel rank (0, 0): 749151744
+0: [default0]:INFO:megatron.core.distributed.distributed_data_parallel:Setting up DistributedDataParallel with config DistributedDataParallelConfig(grad_reduce_in_fp32=False, overlap_grad_reduce=True, overlap_param_gather=True, align_param_gather=False, use_distributed_optimizer=True, num_distributed_optimizer_instances=1, check_for_nan_in_grad=False, check_for_large_grads=False, bucket_size=40000000, pad_buckets_for_high_nccl_busbw=False, reduce_scatter_with_fp32_accumulation=False, average_in_collective=False, fp8_param_gather=False, reuse_grad_buf_for_mxfp8_param_ag=False, use_megatron_fsdp=False, use_custom_fsdp=False, data_parallel_sharding_strategy='no_shard', gradient_reduce_div_fusion=True, suggested_communication_unit_size=None, preserve_fp32_weights=True, keep_fp8_transpose_cache=False, nccl_ub=False, fsdp_double_buffer=False, outer_dp_sharding_strategy='no_shard', disable_symmetric_registration=False, fsdp_m
+0: anual_registration=False, delay_wgrad_compute=False)
+0: [default0]:INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 14
+0: [default0]:Params for bucket 1 (77266944 elements, 77266944 padded size):
+0: [default0]:	module.output_layer.weight
+0: [default0]:Params for bucket 2 (43651584 elements, 43651584 padded size):
+0: [default0]:	module.decoder.final_layernorm.weight
+0: [default0]:	module.decoder.layers.23.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.23.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.23.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.23.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.23.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.23.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.22.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.22.mlp.linear_fc1.weight
+0: [default0]:Params for bucket 3 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.22.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.22.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.21.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.22.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.21.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.21.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.21.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.20.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.20.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.22.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.21.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.21.self_attention.linear_proj.weight
+0: [default0]:Params for bucket 4 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.20.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.19.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.20.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.20.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.20.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.19.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.19.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.19.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.18.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.19.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.19.self_attention.linear
+0: _qkv.weight
+0: [default0]:	module.decoder.layers.18.mlp.linear_fc2.weight
+0: [default0]:Params for bucket 5 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.17.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.17.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.17.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.16.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.18.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.18.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.18.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.18.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.17.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.17.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.17.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.16.mlp.linear_fc2.weight
+0: [default0]:Params for bucket 6 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.16.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.15.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.15.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.14.mlp.linear_fc1.weight
+0: [default0]:	module.deco
+0: der.layers.16.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.16.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.16.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.15.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.15.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.15.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.15.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.14.mlp.linear_fc2.weight
+0: [default0]:Params for bucket 7 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.14.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.13.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.13.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.12.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.13.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.14.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.14.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.14.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.13.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.13.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.13.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.12.mlp.linear_fc2.weight
+0: [default0]:Params for bucket 8 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.12.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.11.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.11.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.11.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.11.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.10.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.12.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.12.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.12.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.11.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.11.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.10.mlp.linear_fc1.weight
+0: [default0]:Params for bucket 9 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.10.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.10.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.9.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.10.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.9.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.9.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.9.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.8.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.10.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.9.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.9.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.8.mlp.linear_fc1.weight
+0: [default0]:Params for bucket 10 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.8.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.7.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.8.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.8.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.7.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.7.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.7.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.6.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.6.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.8.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.7.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.7.mlp.linear_fc1.layer_norm_weight
+0: [default0]:Par
+0: ams for bucket 11 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.6.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.6.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.6.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.5.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.4.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.6.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.5.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.5.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.5.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.5.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.5.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.4.mlp.linear_fc1.weight
+0: [default0]:Params for bucket 12 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.4.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.3.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.4.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.3.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.2.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.2.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.4.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.4.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.3.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.3.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.3.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.3.self_attention.linear_proj.weight
+0: [default0]:Params for bucket 13 (49551360 elements, 49551360 padded size):
+0: [default0]:	module.decoder.layers.2.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.2.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.1.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.1.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.1.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.1.self_attention.linear_proj.weight
+0: [default0]:	module.decoder.layers.2.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.2.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:	module.decoder.layers.1.mlp.linear_fc1.weight
+0: [default0]:	module.decoder.layers.1.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.0.mlp.linear_fc2.weight
+0: [default0]:	module.decoder.layers.0.mlp.linear_fc1.weight
+0: [default0]:Params for bucket 14 (83168256 elements, 83168256 padded size):
+0: [default0]:	module.decoder.layers.0.mlp.linear_fc1.layer_norm_weight
+0: [default0]:	module.decoder.layers.0.self_attention.linear_proj.weight
+0: [default0]:	module.embedding.word_embeddings.weight
+0: [default0]:	module.decoder.layers.0.self_attention.linear_qkv.weight
+0: [default0]:	module.decoder.layers.0.self_attention.linear_qkv.layer_norm_weight
+0: [default0]:INFO:megatron.core.optimizer:Setting up optimizer with config AdamOptimizerConfig(lr=0.0003, min_lr=0.0, decoupled_lr=None, decoupled_min_lr=None, weight_decay=0.1, apply_wd_to_qk_layernorm=False, fp8_recipe='delayed', fp16=False, bf16=True, reuse_grad_buf_for_mxfp8_param_ag=False, params_dtype=torch.bfloat16, use_precision_aware_optimizer=True, store_param_remainders=True, main_grads_dtype=torch.bfloat16, main_params_dtype=torch.float32, exp_avg_dtype=torch.float32, exp_avg_sq_dtype=torch.float32, optimizer='adam', loss_scale=None, initial_loss_scale=4294967296, min_loss_scale=1.0, loss_scale_window=1000, hysteresis=2, adam_beta1=0.9, adam_beta2=0.95, adam_eps=1e-08, decoupled_weight_decay=True, sgd_momentum=0.9, muon_momentum=0.9, muon_split_qkv=True, muon_use_nesterov=False, muon_scale_mode='spectral', muon_fp32_matmul_prec='medium', muon_num_ns_steps=5, muon_tp_mode='blockwise', muon_extra_scale_factor=1.0, use_distributed_optimizer=True, overlap_param_gather=True, overlap_param_gather_with_opt
+0: imizer_step=False, optimizer_cpu_offload=False, optimizer_offload_fraction=1.0, use_torch_optimizer_for_cpu_offload=True, overlap_cpu_optimizer_d2h_h2d=True, pin_cpu_grads=True, pin_cpu_params=True, clip_grad=1.0, log_num_zeros_in_grad=False, barrier_with_L1_time=True, timers=<megatron.core.timers.Timers object at 0x4006d4e412b0>, config_logger_dir='')
+0: [default0]:INFO:megatron.core.optimizer_param_scheduler:> learning rate decay style: constant
+0: [default0]:[after model, optimizer, and learning rate scheduler are built] datetime: 2026-05-29 09:53:18.341843 
+0: [default0]:> building train, validation, and test datasets ...
+0: [default0]: > datasets target sizes (minimum size):
+0: [default0]:    train:      12800
+0: [default0]:    validation: 0
+0: [default0]:    test:       0
+0: [default0]:INFO:megatron.core.datasets.blended_megatron_dataset_config:Let split_matrix = [(0, 0.99), (0.99, 1.0), None]
+0: [default0]:> building train, validation, and test datasets for GPT ...
+0: [default0]:INFO:megatron.core.datasets.blended_megatron_dataset_builder:Building GPTDataset splits with sizes=(12800, 0, 0) and config=GPTDatasetConfig(random_seed=42, sequence_length=4096, blend=(['/capstor/store/cscs/swissai/infra01/datasets/nvidia/Nemotron-ClimbMix/climbmix_small_megatron/climbmix_small'], None), blend_per_split=None, multiple_validation_sets=False, full_validation=False, split='99,1,0', split_matrix=[(0, 0.99), (0.99, 1.0), None], num_dataset_builder_threads=1, path_to_cache='/iopsstor/scratch/cscs/course_00222/gipfelsturm/cache', mmap_bin_files=True, mock=False, tokenizer=<megatron.core.tokenizers.text.models.default_tokenizer.DefaultTokenizerText object at 0x40071e2b3170>, mid_level_dataset_surplus=0.005, allow_ambiguous_pad_tokens=False, fast_cache_load=False, defer_npy_index_mmap=False, reset_pos
+0: ition_ids=False, reset_attention_mask=False, eod_mask_loss=False, create_attention_mask=True, drop_last_partial_validation_sequence=True, add_extra_token_to_sequence=True, object_storage_cache_path=None, data_parallel_size=4, sequence_parallel_size=0, hybrid_context_parallel=False, sequences_per_dataset=None, token_dtype_code=8, context_parallel_size=1)
+0: [default0]:INFO:megatron.core.datasets.indexed_dataset:Load the _IndexReader from /capstor/store/cscs/swissai/infra01/datasets/nvidia/Nemotron-ClimbMix/climbmix_small_megatron/climbmix_small.idx
+0: [default0]:INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence lengths
+0: [default0]:INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence pointers
+0: [default0]:INFO:megatron.core.datasets.indexed_dataset:	Extract the document indices
+0: [default0]:INFO:megatron.core.datasets.indexed_dataset:> total number of sequences: 48965906
+0: [default0]:INFO:megatron.core.datasets.indexed_dataset:> total number of documents: 48965906
+0: [default0]:INFO:megatron.core.d
+0: atasets.gpt_dataset:Load the GPTDataset train indices
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 386684f926f6508315ae79a7c93b3a3f-GPTDataset-train-document_index.npy
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 386684f926f6508315ae79a7c93b3a3f-GPTDataset-train-sample_index.npy
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 386684f926f6508315ae79a7c93b3a3f-GPTDataset-train-shuffle_index.npy
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 8612827
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:Load the GPTDataset valid indices
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 6c2a477a66fad2c8906c534adf361bcc-GPTDataset-valid-document_index.npy
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 6c2a477a66fad2c8906c534adf361bcc-GPTDataset-valid-sample_index.npy
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 6c2a477a66fad2c8906c534adf361bcc-GPTDataset-valid-shuffle_index.npy
+0: [default0]:INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 61644
+0: [default0]:> finished creating 
+0: GPT datasets ...
+0: [default3]:INFO:megatron.core.timers:(min, max) time across ranks (ms):
+0: [default3]:    model-and-optimizer-setup ......................: (1676.15, 1676.36)
+0: [default3]:    train/valid/test-data-iterators-setup ..........: (965.98, 987.64)
+0: [default0]:[after dataloaders are built] datetime: 2026-05-29 09:53:19.331179 
+0: [default0]:done with setup ...
+0: [default0]:training ...
+0: [default0]:Overwriting rerun_state_machine.current_iteration from -1 to 0...
+0: [default0]:[before the start of training step] datetime: 2026-05-29 09:53:19.340327 
+0: [default0]:/users/course_00222/lsaie-ss26-gipfelsturm/Megatron-LM/megatron/core/pipeline_parallel/schedules.py:189: UserWarning: The AccumulateGrad node's stream does not match the stream of the node that produced the incoming gradient. This may incur unnecessary synchronization and break CUDA graph capture if the AccumulateGrad node's stream is the default stream. This mismatch is caused by an AccumulateGrad node created prior to the current iteration being kept alive. This can happen if the autograd graph is still being kept alive by tensors such as the loss, or if you are using DDP, which will stash a reference to the node. To resolve the mismatch, delete all references to the autograd graph or ensure that DDP initialization is performed under the same stream as subsequent forwards. If the mismatch is intentional, you can use torch.autograd.graph.set_warn_on_accumulate_grad_stream_mismatch(False) to suppress this warning. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/autograd/input_buffer.cpp:24
+0: 0.)
+0: [default0]:  Variable._execution_engine.run_backward(
+0: [default3]: [2026-05-29 09:53:32.861339] iteration        1/      50 | consumed samples:          256 | elapsed time per iteration (ms): 13520.9 | throughput per GPU (TFLOP/s/GPU): 95.7 | tokens/sec/GPU: 19388 | learning rate: 3.000000E-05 | global batch size:   256 | lm loss: 1.112003E+01 | loss scale: 1.0 | grad norm: 15.698 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default0]:/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+0: [default0]:  return func(*args, **kwargs)
+0: [default0]:Number of parameters in transformer block in billions:  0.59
+0: [default0]:Number of parameters in embedding layers in billions: 0.15
+0: [default0]:Total number of parameters in billions: 0.75
+0: [default0]:Number of parameters in most loaded shard in billions: 0.7492
+0: [default0]:compute_activation_memory_without_sp
+0: [default0]:Activation memory footprint per transformer layer (precise, without SP): 3264.0 MB
+0: [default0]:Theoretical memory footprints: weight and optimizer=6430.02 MB, activation=89158.12 MB, total=95588.15 MB
+0: [default0]:
+0: [default0]:[Rank 0] (after 1 iterations) memory (MB) | allocated: 4936.03 | max allocated: 38214.73 | reserved: 41742.00 | max reserved: 41742.00
+0: [default3]: [2026-05-29 09:53:38.586568] iteration        2/      50 | consumed samples:          512 | elapsed time per iteration (ms): 9623.0 | throughput per GPU (TFLOP/s/GPU): 134.5 | tokens/sec/GPU: 27241 | learning rate: 6.000000E-05 | global batch size:   256 | lm loss: 1.111969E+01 | loss scale: 1.0 | grad norm: 14.646 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default0]:Number of parameters in transformer block in billions:  0.59
+0: [default0]:Number of parameters in embedding layers in billions: 0.15
+0: [default0]:Total number of parameters in billions: 0.75
+0: [default0]:Number of parameters in most loaded shard in billions: 0.7492
+0: [default0]:compute_activation_memory_without_sp
+0: [default0]:Activation memory footprint per transformer layer (precise, without SP): 3264.0 MB
+0: [default0]:Theoretical memory footprints: weight and optimizer=6430.02 MB, activation=89158.12 MB, total=95588.15 MB
+0: [default0]:
+0: [default0]:[Rank 0] (after 2 iterations) memory (MB) | allocated: 4936.03 | max allocated: 40000.85 | reserved: 43226.00 | max reserved: 43226.00
+0: [default3]: [2026-05-29 09:53:45.319101] iteration        3/      50 | consumed samples:          768 | elapsed time per iteration (ms): 6732.4 | throughput per GPU (TFLOP/s/GPU): 192.2 | tokens/sec/GPU: 38938 | learning rate: 9.000000E-05 | global batch size:   256 | lm loss: 1.007317E+01 | loss scale: 1.0 | grad norm: 20.148 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:53:51.609525] iteration        4/      50 | consumed samples:         1024 | elapsed time per iteration (ms): 6290.3 | throughput per GPU (TFLOP/s/GPU): 205.7 | tokens/sec/GPU: 41674 | learning rate: 1.200000E-04 | global batch size:   256 | lm loss: 9.407327E+00 | loss scale: 1.0 | grad norm: 10.569 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:53:57.555295] iteration        5/      50 | consumed samples:         1280 | elapsed time per iteration (ms): 5945.6 | throughput per GPU (TFLOP/s/GPU): 217.7 | tokens/sec/GPU: 44090 | learning rate: 1.500000E-04 | global batch size:   256 | lm loss: 9.862194E+00 | loss scale: 1.0 | grad norm: 10.835 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:03.566271] iteration        6/      50 | consumed samples:         1536 | elapsed time per iteration (ms): 6010.8 | throughput per GPU (TFLOP/s/GPU): 215.3 | tokens/sec/GPU: 43612 | learning rate: 1.800000E-04 | global batch size:   256 | lm loss: 9.589147E+00 | loss scale: 1.0 | grad norm: 4.273 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:08.934524] iteration        7/      50 | consumed samples:         1792 | elapsed time per iteration (ms): 5368.1 | throughput per GPU (TFLOP/s/GPU): 241.1 | tokens/sec/GPU: 48834 | learning rate: 2.100000E-04 | global batch size:   256 | lm loss: 9.734173E+00 | loss scale: 1.0 | grad norm: 25.442 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:13.926833] iteration        8/      50 | consumed samples:         2048 | elapsed time per iteration (ms): 4992.2 | throughput per GPU (TFLOP/s/GPU): 259.2 | tokens/sec/GPU: 52511 | learning rate: 2.400000E-04 | global batch size:   256 | lm loss: 8.896334E+00 | loss scale: 1.0 | grad norm: 4.104 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:19.038950] iteration        9/      50 | consumed samples:         2304 | elapsed time per iteration (ms): 5111.9 | throughput per GPU (TFLOP/s/GPU): 253.2 | tokens/sec/GPU: 51281 | learning rate: 2.700000E-04 | global batch size:   256 | lm loss: 8.641436E+00 | loss scale: 1.0 | grad norm: 2.482 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:24.297641] iteration       10/      50 | consumed samples:         2560 | elapsed time per iteration (ms): 5258.5 | throughput per GPU (TFLOP/s/GPU): 246.1 | tokens/sec/GPU: 49851 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 8.318115E+00 | loss scale: 1.0 | grad norm: 1.767 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:29.879181] iteration       11/      50 | consumed samples:         2816 | elapsed time per iteration (ms): 5581.4 | throughput per GPU (TFLOP/s/GPU): 231.9 | tokens/sec/GPU: 46967 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 8.093153E+00 | loss scale: 1.0 | grad norm: 3.827 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:34.649491] iteration       12/      50 | consumed samples:         3072 | elapsed time per iteration (ms): 4770.2 | throughput per GPU (TFLOP/s/GPU): 271.3 | tokens/sec/GPU: 54955 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 1.222934E+01 | loss scale: 1.0 | grad norm: 66.332 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:39.922745] iteration       13/      50 | consumed samples:         3328 | elapsed time per iteration (ms): 5273.1 | throughput per GPU (TFLOP/s/GPU): 245.4 | tokens/sec/GPU: 49713 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.830618E+00 | loss scale: 1.0 | grad norm: 3.281 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:45.319429] iteration       14/      50 | consumed samples:         3584 | elapsed time per iteration (ms): 5396.5 | throughput per GPU (TFLOP/s/GPU): 239.8 | tokens/sec/GPU: 48576 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.724665E+00 | loss scale: 1.0 | grad norm: 2.170 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:50.223784] iteration       15/      50 | consumed samples:         3840 | elapsed time per iteration (ms): 4904.2 | throughput per GPU (TFLOP/s/GPU): 263.9 | tokens/sec/GPU: 53453 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.582283E+00 | loss scale: 1.0 | grad norm: 0.966 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:54:55.052747] iteration       16/      50 | consumed samples:         4096 | elapsed time per iteration (ms): 4828.8 | throughput per GPU (TFLOP/s/GPU): 268.0 | tokens/sec/GPU: 54287 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.553687E+00 | loss scale: 1.0 | grad norm: 1.742 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:00.008182] iteration       17/      50 | consumed samples:         4352 | elapsed time per iteration (ms): 4955.3 | throughput per GPU (TFLOP/s/GPU): 261.2 | tokens/sec/GPU: 52902 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.469761E+00 | loss scale: 1.0 | grad norm: 1.481 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:04.411419] iteration       18/      50 | consumed samples:         4608 | elapsed time per iteration (ms): 4403.1 | throughput per GPU (TFLOP/s/GPU): 293.9 | tokens/sec/GPU: 59536 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.539677E+00 | loss scale: 1.0 | grad norm: 1.473 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:09.269707] iteration       19/      50 | consumed samples:         4864 | elapsed time per iteration (ms): 4858.1 | throughput per GPU (TFLOP/s/GPU): 266.4 | tokens/sec/GPU: 53960 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.464684E+00 | loss scale: 1.0 | grad norm: 0.898 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:13.705182] iteration       20/      50 | consumed samples:         5120 | elapsed time per iteration (ms): 4435.3 | throughput per GPU (TFLOP/s/GPU): 291.8 | tokens/sec/GPU: 59104 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.453548E+00 | loss scale: 1.0 | grad norm: 1.293 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:19.036013] iteration       21/      50 | consumed samples:         5376 | elapsed time per iteration (ms): 5330.7 | throughput per GPU (TFLOP/s/GPU): 242.8 | tokens/sec/GPU: 49176 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.435402E+00 | loss scale: 1.0 | grad norm: 1.155 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:23.809520] iteration       22/      50 | consumed samples:         5632 | elapsed time per iteration (ms): 4773.3 | throughput per GPU (TFLOP/s/GPU): 271.1 | tokens/sec/GPU: 54918 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.422112E+00 | loss scale: 1.0 | grad norm: 1.020 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:28.512442] iteration       23/      50 | consumed samples:         5888 | elapsed time per iteration (ms): 4702.8 | throughput per GPU (TFLOP/s/GPU): 275.2 | tokens/sec/GPU: 55742 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.350466E+00 | loss scale: 1.0 | grad norm: 1.076 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:33.766506] iteration       24/      50 | consumed samples:         6144 | elapsed time per iteration (ms): 5253.9 | throughput per GPU (TFLOP/s/GPU): 246.3 | tokens/sec/GPU: 49895 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.348692E+00 | loss scale: 1.0 | grad norm: 0.697 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:38.906269] iteration       25/      50 | consumed samples:         6400 | elapsed time per iteration (ms): 5139.6 | throughput per GPU (TFLOP/s/GPU): 251.8 | tokens/sec/GPU: 51005 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.447548E+00 | loss scale: 1.0 | grad norm: 0.766 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:44.093577] iteration       26/      50 | consumed samples:         6656 | elapsed time per iteration (ms): 5187.1 | throughput per GPU (TFLOP/s/GPU): 249.5 | tokens/sec/GPU: 50537 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.366681E+00 | loss scale: 1.0 | grad norm: 0.551 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:48.490201] iteration       27/      50 | consumed samples:         6912 | elapsed time per iteration (ms): 4396.5 | throughput per GPU (TFLOP/s/GPU): 294.4 | tokens/sec/GPU: 59626 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.272112E+00 | loss scale: 1.0 | grad norm: 1.404 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:53.572387] iteration       28/      50 | consumed samples:         7168 | elapsed time per iteration (ms): 5082.0 | throughput per GPU (TFLOP/s/GPU): 254.7 | tokens/sec/GPU: 51582 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.295037E+00 | loss scale: 1.0 | grad norm: 0.669 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:55:58.320041] iteration       29/      50 | consumed samples:         7424 | elapsed time per iteration (ms): 4747.5 | throughput per GPU (TFLOP/s/GPU): 272.6 | tokens/sec/GPU: 55217 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.319732E+00 | loss scale: 1.0 | grad norm: 0.742 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:03.812260] iteration       30/      50 | consumed samples:         7680 | elapsed time per iteration (ms): 5492.1 | throughput per GPU (TFLOP/s/GPU): 235.6 | tokens/sec/GPU: 47731 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.285422E+00 | loss scale: 1.0 | grad norm: 0.731 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:08.405105] iteration       31/      50 | consumed samples:         7936 | elapsed time per iteration (ms): 4592.7 | throughput per GPU (TFLOP/s/GPU): 281.8 | tokens/sec/GPU: 57079 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.165621E+00 | loss scale: 1.0 | grad norm: 0.938 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:13.782722] iteration       32/      50 | consumed samples:         8192 | elapsed time per iteration (ms): 5377.5 | throughput per GPU (TFLOP/s/GPU): 240.7 | tokens/sec/GPU: 48749 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.098872E+00 | loss scale: 1.0 | grad norm: 1.161 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:18.668435] iteration       33/      50 | consumed samples:         8448 | elapsed time per iteration (ms): 4885.6 | throughput per GPU (TFLOP/s/GPU): 264.9 | tokens/sec/GPU: 53657 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.278528E+00 | loss scale: 1.0 | grad norm: 2.854 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:23.760352] iteration       34/      50 | consumed samples:         8704 | elapsed time per iteration (ms): 5091.8 | throughput per GPU (TFLOP/s/GPU): 254.2 | tokens/sec/GPU: 51484 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.133533E+00 | loss scale: 1.0 | grad norm: 0.984 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:28.761577] iteration       35/      50 | consumed samples:         8960 | elapsed time per iteration (ms): 5001.1 | throughput per GPU (TFLOP/s/GPU): 258.8 | tokens/sec/GPU: 52417 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.143085E+00 | loss scale: 1.0 | grad norm: 1.478 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:34.227084] iteration       36/      50 | consumed samples:         9216 | elapsed time per iteration (ms): 5465.4 | throughput per GPU (TFLOP/s/GPU): 236.8 | tokens/sec/GPU: 47965 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.050586E+00 | loss scale: 1.0 | grad norm: 1.211 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:39.494818] iteration       37/      50 | consumed samples:         9472 | elapsed time per iteration (ms): 5267.6 | throughput per GPU (TFLOP/s/GPU): 245.7 | tokens/sec/GPU: 49765 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.108474E+00 | loss scale: 1.0 | grad norm: 1.311 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:44.613378] iteration       38/      50 | consumed samples:         9728 | elapsed time per iteration (ms): 5118.4 | throughput per GPU (TFLOP/s/GPU): 252.8 | tokens/sec/GPU: 51216 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.069650E+00 | loss scale: 1.0 | grad norm: 2.575 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:49.320345] iteration       39/      50 | consumed samples:         9984 | elapsed time per iteration (ms): 4706.8 | throughput per GPU (TFLOP/s/GPU): 275.0 | tokens/sec/GPU: 55694 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.099497E+00 | loss scale: 1.0 | grad norm: 1.452 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:54.283427] iteration       40/      50 | consumed samples:        10240 | elapsed time per iteration (ms): 4962.9 | throughput per GPU (TFLOP/s/GPU): 260.8 | tokens/sec/GPU: 52820 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 7.080202E+00 | loss scale: 1.0 | grad norm: 1.111 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:56:59.319481] iteration       41/      50 | consumed samples:        10496 | elapsed time per iteration (ms): 5035.9 | throughput per GPU (TFLOP/s/GPU): 257.0 | tokens/sec/GPU: 52055 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.920493E+00 | loss scale: 1.0 | grad norm: 2.078 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:04.869560] iteration       42/      50 | consumed samples:        10752 | elapsed time per iteration (ms): 5549.9 | throughput per GPU (TFLOP/s/GPU): 233.2 | tokens/sec/GPU: 47234 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.944324E+00 | loss scale: 1.0 | grad norm: 1.733 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:09.616979] iteration       43/      50 | consumed samples:        11008 | elapsed time per iteration (ms): 4747.3 | throughput per GPU (TFLOP/s/GPU): 272.6 | tokens/sec/GPU: 55220 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.982539E+00 | loss scale: 1.0 | grad norm: 1.425 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:15.005776] iteration       44/      50 | consumed samples:        11264 | elapsed time per iteration (ms): 5388.7 | throughput per GPU (TFLOP/s/GPU): 240.2 | tokens/sec/GPU: 48647 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.823424E+00 | loss scale: 1.0 | grad norm: 0.815 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:20.652455] iteration       45/      50 | consumed samples:        11520 | elapsed time per iteration (ms): 5646.5 | throughput per GPU (TFLOP/s/GPU): 229.2 | tokens/sec/GPU: 46426 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.897292E+00 | loss scale: 1.0 | grad norm: 1.601 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:25.854594] iteration       46/      50 | consumed samples:        11776 | elapsed time per iteration (ms): 5202.0 | throughput per GPU (TFLOP/s/GPU): 248.8 | tokens/sec/GPU: 50393 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.863183E+00 | loss scale: 1.0 | grad norm: 1.442 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:32.045500] iteration       47/      50 | consumed samples:        12032 | elapsed time per iteration (ms): 6190.8 | throughput per GPU (TFLOP/s/GPU): 209.0 | tokens/sec/GPU: 42344 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.818623E+00 | loss scale: 1.0 | grad norm: 0.833 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:36.978193] iteration       48/      50 | consumed samples:        12288 | elapsed time per iteration (ms): 4932.6 | throughput per GPU (TFLOP/s/GPU): 262.4 | tokens/sec/GPU: 53146 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.881660E+00 | loss scale: 1.0 | grad norm: 1.565 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:42.138812] iteration       49/      50 | consumed samples:        12544 | elapsed time per iteration (ms): 5160.5 | throughput per GPU (TFLOP/s/GPU): 250.8 | tokens/sec/GPU: 50798 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.805258E+00 | loss scale: 1.0 | grad norm: 2.798 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default3]: [2026-05-29 09:57:47.200656] iteration       50/      50 | consumed samples:        12800 | elapsed time per iteration (ms): 5061.7 | throughput per GPU (TFLOP/s/GPU): 255.7 | tokens/sec/GPU: 51790 | learning rate: 3.000000E-04 | global batch size:   256 | lm loss: 6.762568E+00 | loss scale: 1.0 | grad norm: 1.841 | number of skipped iterations:   0 | number of nan iterations:   0 |
+0: [default0]:[after training is done] datetime: 2026-05-29 09:57:47.469806 
+0: [default3]:wandb: updating run metadata
+0: [default3]:wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml; uploading summary, console lines 62-64
+0: [default3]:wandb: uploading output.log; uploading wandb-summary.json
+0: [default3]:wandb: 🚀 View run throughput-760m-mbs16-offload-1n-2421158 at: https://wandb.ai/hannes-eberhard-eth-z-rich/gipfelsturm/runs/ti1cmwpi
+0: [default3]:wandb: ⭐️ View project at: https://wandb.ai/hannes-eberhard-eth-z-rich/gipfelsturm
+0: [default3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+0: [default3]:wandb: Find logs at: /iopsstor/scratch/cscs/course_00222/gipfelsturm/gipfelsturm/throughput-760m-mbs16-offload-1n/wandb/run-20260529_095301-ti1cmwpi/logs
+0: [default0]:[rank0]:[W529 09:57:49.336619331 ProcessGroupNCCL.cpp:1565] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+0: [default1]:[rank1]:[W529 09:57:50.588648686 ProcessGroupNCCL.cpp:1565] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+0: [default3]:[rank3]:[W529 09:57:50.598523663 ProcessGroupNCCL.cpp:1565] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+0: [default2]:[rank2]:[W529 09:57:50.900240473 ProcessGroupNCCL.cpp:1565] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+0: END TIME: Fri May 29 09:57:54 CEST 2026
+END TIME: Fri May 29 09:57:55 AM CEST 2026
