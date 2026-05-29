@@ -1,0 +1,617 @@
+# Patch: Add xLSTM sequence mixer as a drop-in attention alternative
+#
+# Problem:
+#   Megatron-LM core_v0.16.1 ships Mamba and GDN as sequence mixing
+#   alternatives to standard self-attention, but has no support for xLSTM
+#   (Extended Long Short-Term Memory, Beck et al. 2024). There is no
+#   mLSTM-based mixer, no layer spec, and no entrypoint for xLSTM training.
+#
+# What this patch does:
+#   Adds four new files — no existing files are modified:
+#
+#   megatron/core/ssm/xlstm_mixer.py
+#     Implements xLSTMMixer, a MegatronModule drop-in for SelfAttention.
+#     Satisfies the TransformerLayer submodule contract:
+#       - forward(hidden_states, ...) -> (output, bias=None)
+#       - hidden_states shape [seq, batch, hidden] (sequence-first)
+#     Internally: one fused input projection [q|k|v|i|f|o], depth-wise
+#     causal conv1d on q/k/v (kernel size 4, same trick as Mamba), then
+#     the mLSTM matrix-memory recurrence (C_t = f_t*C_{t-1} + i_t*v_t k_t^T),
+#     per-head GroupNorm, output projection. Causal by gate construction —
+#     ignores attention_mask and rotary_pos_emb entirely.
+#
+#   megatron/core/models/xlstm/xlstm_layer_specs.py
+#     Provides xlstm_layer_spec(use_transformer_engine=True) returning a
+#     ModuleSpec(module=TransformerLayer, submodules=TransformerLayerSubmodules(
+#       self_attention=xLSTMMixer, ...)) with TE or local norm/linear backends.
+#     Mirrors megatron/core/models/gpt/gpt_layer_specs.py; only self_attention
+#     changes — input_layernorm, MLP, and both BDA residuals are unchanged.
+#
+#   megatron/core/models/xlstm/__init__.py
+#     Package init exposing xlstm_layer_spec at megatron.core.models.xlstm.
+#     Mirrors megatron/core/models/mamba/__init__.py.
+#
+#   pretrain_xlstm.py
+#     Training entrypoint (sibling of pretrain_gpt.py). Monkey-patches
+#     megatron.core.models.gpt.gpt_layer_specs.get_gpt_decoder_block_spec
+#     to return an all-xLSTM TransformerBlockSubmodules, then delegates to
+#     pretrain_gpt.py via runpy. No existing files modified.
+#
+# How to find the right location in a future version:
+#   The mixer belongs alongside other SSM mixers in megatron/core/ssm/.
+#   The spec belongs alongside other model specs in megatron/core/models/.
+#   The entrypoint pattern (monkey-patch + runpy) is self-contained in
+#   pretrain_xlstm.py and does not depend on any specific line numbers.
+#
+# Launching:
+#   Use launch_xlstm.sh (lives in $WORKDIR, not in this submodule).
+#   Key differences from launch.sh:
+#     - torchrun target: pretrain_xlstm.py
+#     - --position-embedding-type none  (xLSTM is position-free)
+#     - --group-query-attention / --num-query-groups removed
+#     - pip install xlstm  (replaces mamba-ssm causal-conv1d)
+#     - MASTER_PORT=25680
+#
+# Applied to: Megatron-LM core_v0.16.1
+
+diff --git a/core_nid006136_273469 b/core_nid006136_273469
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/core_nid006144_10865 b/core_nid006144_10865
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/core_nid006934_38008 b/core_nid006934_38008
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/core_nid007595_129084 b/core_nid007595_129084
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/megatron/core/models/xlstm/__init__.py b/megatron/core/models/xlstm/__init__.py
+new file mode 100644
+index 000000000..85144f51b
+--- /dev/null
++++ b/megatron/core/models/xlstm/__init__.py
+@@ -0,0 +1,15 @@
++# Copyright (c) 2026 Gipfelsturm.
++#
++# Install path: megatron/core/models/xlstm/__init__.py
++#   (mirrors megatron/core/models/mamba/__init__.py)
++"""xLSTM integration for Megatron-LM core_v0.16.1.
++
++Public API:
++    xlstm_layer_spec()    — returns the ModuleSpec to pass to GPTModel
++
++The mixer itself lives under megatron.core.ssm.xlstm_mixer alongside Mamba.
++"""
++
++from megatron.core.models.xlstm.xlstm_layer_specs import xlstm_layer_spec
++
++__all__ = ["xlstm_layer_spec"]
+\ No newline at end of file
+diff --git a/megatron/core/models/xlstm/xlstm_layer_spec.py b/megatron/core/models/xlstm/xlstm_layer_spec.py
+new file mode 100644
+index 000000000..035153303
+--- /dev/null
++++ b/megatron/core/models/xlstm/xlstm_layer_spec.py
+@@ -0,0 +1,96 @@
++# Copyright (c) 2026 Gipfelsturm. xLSTM layer spec for Megatron-LM core_v0.16.1.
++#
++# Install path: megatron/core/models/xlstm/xlstm_layer_specs.py
++#   (mirrors megatron/core/models/mamba/mamba_layer_specs.py)
++#
++# Mirrors megatron/core/models/gpt/gpt_layer_specs.py but swaps SelfAttention
++# for xLSTMMixer. Everything else (input layernorm, BDA, pre-MLP layernorm,
++# MLP, output BDA) stays identical — that's the whole point of the spec
++# system, you only change the mixer.
++
++from megatron.core.fusions.fused_bias_dropout import get_bias_dropout_add
++from megatron.core.ssm.xlstm_mixer import xLSTMMixer, xLSTMMixerSubmodules
++from megatron.core.transformer.identity_op import IdentityOp
++from megatron.core.transformer.mlp import MLP, MLPSubmodules
++from megatron.core.transformer.spec_utils import ModuleSpec
++from megatron.core.transformer.transformer_layer import (
++    TransformerLayer,
++    TransformerLayerSubmodules,
++)
++
++try:
++    # Prefer the TE-backed norms/linears — they're what the GPT spec uses
++    # in fp8/bf16 paths and what launch.sh already exercises.
++    from megatron.core.extensions.transformer_engine import (
++        TEColumnParallelLinear,
++        TELayerNormColumnParallelLinear,
++        TENorm,
++        TERowParallelLinear,
++    )
++    HAVE_TE = True
++except ImportError:
++    HAVE_TE = False
++
++
++def xlstm_layer_spec(use_transformer_engine: bool = True) -> ModuleSpec:
++    """Returns a ModuleSpec describing one xLSTM decoder layer.
++
++    Layer structure (identical to a GPT layer except the mixer):
++
++        x ──► RMSNorm ──► xLSTMMixer ──► (BDA residual) ──┐
++                                                          ├──► RMSNorm ──► MLP ──► (BDA residual) ──► out
++        x ────────────────────────────────────────────────┘
++
++    The same TransformerLayer class wires this up — only the
++    self_attention submodule swaps to xLSTMMixer.
++
++    Args:
++        use_transformer_engine: whether to use TE-backed norms and MLP
++            linears. Default True matches launch.sh's TE setup.
++    """
++    if use_transformer_engine:
++        assert HAVE_TE, "transformer_engine is required for use_transformer_engine=True"
++        layer_norm_cls = TENorm
++        linear_fc1_cls = TELayerNormColumnParallelLinear
++        linear_fc2_cls = TERowParallelLinear
++    else:
++        # Local fallback — useful for debugging without TE.
++        from megatron.core.transformer.torch_norm import WrappedTorchNorm
++        from megatron.core.tensor_parallel.layers import (
++            ColumnParallelLinear,
++            RowParallelLinear,
++        )
++        layer_norm_cls = WrappedTorchNorm
++        linear_fc1_cls = ColumnParallelLinear
++        linear_fc2_cls = RowParallelLinear
++
++    mlp = ModuleSpec(
++        module=MLP,
++        submodules=MLPSubmodules(
++            linear_fc1=linear_fc1_cls,
++            linear_fc2=linear_fc2_cls,
++        ),
++    )
++
++    return ModuleSpec(
++        module=TransformerLayer,
++        submodules=TransformerLayerSubmodules(
++            # When fc1 is a TELayerNormColumnParallelLinear, the norm is
++            # fused INTO it — so pre_mlp_layernorm becomes IdentityOp. We
++            # don't have that fusion for the mixer though, so we need a
++            # real norm in front. Match the local-spec layout: explicit
++            # input_layernorm, IdentityOp for pre_mlp_layernorm when the
++            # fc1 fuses it, else explicit norm.
++            input_layernorm=layer_norm_cls,
++            self_attention=ModuleSpec(
++                module=xLSTMMixer,
++                submodules=xLSTMMixerSubmodules(),
++                # No params dict needed — defaults are fine. attn_mask_type
++                # is accepted but ignored since xLSTM is causal by gates.
++            ),
++            self_attn_bda=get_bias_dropout_add,
++            pre_mlp_layernorm=IdentityOp if use_transformer_engine else layer_norm_cls,
++            mlp=mlp,
++            mlp_bda=get_bias_dropout_add,
++        ),
++    )
+\ No newline at end of file
+diff --git a/megatron/core/models/xlstm/xlstm_layer_specs.py b/megatron/core/models/xlstm/xlstm_layer_specs.py
+new file mode 100644
+index 000000000..035153303
+--- /dev/null
++++ b/megatron/core/models/xlstm/xlstm_layer_specs.py
+@@ -0,0 +1,96 @@
++# Copyright (c) 2026 Gipfelsturm. xLSTM layer spec for Megatron-LM core_v0.16.1.
++#
++# Install path: megatron/core/models/xlstm/xlstm_layer_specs.py
++#   (mirrors megatron/core/models/mamba/mamba_layer_specs.py)
++#
++# Mirrors megatron/core/models/gpt/gpt_layer_specs.py but swaps SelfAttention
++# for xLSTMMixer. Everything else (input layernorm, BDA, pre-MLP layernorm,
++# MLP, output BDA) stays identical — that's the whole point of the spec
++# system, you only change the mixer.
++
++from megatron.core.fusions.fused_bias_dropout import get_bias_dropout_add
++from megatron.core.ssm.xlstm_mixer import xLSTMMixer, xLSTMMixerSubmodules
++from megatron.core.transformer.identity_op import IdentityOp
++from megatron.core.transformer.mlp import MLP, MLPSubmodules
++from megatron.core.transformer.spec_utils import ModuleSpec
++from megatron.core.transformer.transformer_layer import (
++    TransformerLayer,
++    TransformerLayerSubmodules,
++)
++
++try:
++    # Prefer the TE-backed norms/linears — they're what the GPT spec uses
++    # in fp8/bf16 paths and what launch.sh already exercises.
++    from megatron.core.extensions.transformer_engine import (
++        TEColumnParallelLinear,
++        TELayerNormColumnParallelLinear,
++        TENorm,
++        TERowParallelLinear,
++    )
++    HAVE_TE = True
++except ImportError:
++    HAVE_TE = False
++
++
++def xlstm_layer_spec(use_transformer_engine: bool = True) -> ModuleSpec:
++    """Returns a ModuleSpec describing one xLSTM decoder layer.
++
++    Layer structure (identical to a GPT layer except the mixer):
++
++        x ──► RMSNorm ──► xLSTMMixer ──► (BDA residual) ──┐
++                                                          ├──► RMSNorm ──► MLP ──► (BDA residual) ──► out
++        x ────────────────────────────────────────────────┘
++
++    The same TransformerLayer class wires this up — only the
++    self_attention submodule swaps to xLSTMMixer.
++
++    Args:
++        use_transformer_engine: whether to use TE-backed norms and MLP
++            linears. Default True matches launch.sh's TE setup.
++    """
++    if use_transformer_engine:
++        assert HAVE_TE, "transformer_engine is required for use_transformer_engine=True"
++        layer_norm_cls = TENorm
++        linear_fc1_cls = TELayerNormColumnParallelLinear
++        linear_fc2_cls = TERowParallelLinear
++    else:
++        # Local fallback — useful for debugging without TE.
++        from megatron.core.transformer.torch_norm import WrappedTorchNorm
++        from megatron.core.tensor_parallel.layers import (
++            ColumnParallelLinear,
++            RowParallelLinear,
++        )
++        layer_norm_cls = WrappedTorchNorm
++        linear_fc1_cls = ColumnParallelLinear
++        linear_fc2_cls = RowParallelLinear
++
++    mlp = ModuleSpec(
++        module=MLP,
++        submodules=MLPSubmodules(
++            linear_fc1=linear_fc1_cls,
++            linear_fc2=linear_fc2_cls,
++        ),
++    )
++
++    return ModuleSpec(
++        module=TransformerLayer,
++        submodules=TransformerLayerSubmodules(
++            # When fc1 is a TELayerNormColumnParallelLinear, the norm is
++            # fused INTO it — so pre_mlp_layernorm becomes IdentityOp. We
++            # don't have that fusion for the mixer though, so we need a
++            # real norm in front. Match the local-spec layout: explicit
++            # input_layernorm, IdentityOp for pre_mlp_layernorm when the
++            # fc1 fuses it, else explicit norm.
++            input_layernorm=layer_norm_cls,
++            self_attention=ModuleSpec(
++                module=xLSTMMixer,
++                submodules=xLSTMMixerSubmodules(),
++                # No params dict needed — defaults are fine. attn_mask_type
++                # is accepted but ignored since xLSTM is causal by gates.
++            ),
++            self_attn_bda=get_bias_dropout_add,
++            pre_mlp_layernorm=IdentityOp if use_transformer_engine else layer_norm_cls,
++            mlp=mlp,
++            mlp_bda=get_bias_dropout_add,
++        ),
++    )
+\ No newline at end of file
+diff --git a/megatron/core/ssm/xlstm_mixer.py b/megatron/core/ssm/xlstm_mixer.py
+new file mode 100644
+index 000000000..a32b286e9
+--- /dev/null
++++ b/megatron/core/ssm/xlstm_mixer.py
+@@ -0,0 +1,248 @@
++# Copyright (c) 2026 Gipfelsturm. xLSTM mixer for Megatron-LM core_v0.16.1.
++#
++# Install path: megatron/core/ssm/xlstm_mixer.py
++#   (mirrors megatron/core/ssm/mamba_mixer.py)
++#
++# Megatron-compatible drop-in replacement for SelfAttention.
++# Wraps an mLSTM block (matrix-memory LSTM from Beck et al. 2024, "xLSTM:
++# Extended Long Short-Term Memory") so it satisfies the contract expected by
++# TransformerLayer + TransformerLayerSubmodules:
++#   - constructor signature compatible with attention.SelfAttention
++#   - forward(hidden_states, attention_mask, ..., **kwargs) -> (output, bias)
++#   - hidden_states shape is [seq, batch, hidden] (sequence-first)
++#   - bias is returned as None so get_bias_dropout_add handles the residual
++
++from typing import Optional
++
++import torch
++from torch import Tensor, nn
++
++from megatron.core.transformer.module import MegatronModule
++from megatron.core.transformer.transformer_config import TransformerConfig
++
++
++class xLSTMMixerSubmodules:
++    """Placeholder submodules dataclass — currently the mixer is self-contained
++    and does not delegate any submodules out. Kept for API symmetry with
++    SelfAttentionSubmodules so the spec system can pass `submodules=` if we
++    later want to swap the inner mLSTM implementation."""
++
++    def __init__(self):
++        pass
++
++
++class xLSTMMixer(MegatronModule):
++    """xLSTM (mLSTM-variant) sequence mixer.
++
++    Replaces SelfAttention inside a TransformerLayer. The outer TransformerLayer
++    still owns: input_layernorm, residual add, pre_mlp_layernorm, MLP, etc.
++    This module owns only the sequence-mixing operation between the two norms.
++
++    The mLSTM cell maintains a matrix-valued cell state C_t and a scalar
++    normalizer n_t per head; updates are gated by input/forget/output gates
++    derived from the input. Causal by construction — ignores attention_mask.
++
++    Args:
++        config: TransformerConfig from Megatron. Drives hidden_size, kv_channels
++            (used as head_dim), num_attention_heads (used as num_heads), dropout,
++            init scheme, and dtype.
++        submodules: Unused; kept for spec-system compatibility.
++        layer_number: 1-indexed layer position. Used by Megatron for logging
++            and (potentially) per-layer init scaling.
++        attn_mask_type: Ignored — xLSTM is causal by gate construction.
++    """
++
++    def __init__(
++        self,
++        config: TransformerConfig,
++        submodules: Optional[xLSTMMixerSubmodules] = None,
++        layer_number: int = 1,
++        attn_mask_type=None,
++    ):
++        super().__init__(config=config)
++
++        self.config = config
++        self.layer_number = layer_number
++        self.hidden_size = config.hidden_size
++        self.num_heads = config.num_attention_heads
++        assert self.hidden_size % self.num_heads == 0, (
++            f"hidden_size ({self.hidden_size}) must be divisible by "
++            f"num_attention_heads ({self.num_heads})"
++        )
++        self.head_dim = self.hidden_size // self.num_heads
++
++        # --- Input projections ---------------------------------------------
++        # qkv-style projection: produce query, key, value plus three gates
++        # (input, forget, output). The mLSTM uses q/k/v just like attention
++        # does, but the temporal mixing is recurrent rather than softmax.
++        #
++        # We pack everything into one big linear for kernel efficiency:
++        #   projection_out = [q | k | v | i_gate | f_gate | o_gate]
++        # All six are hidden_size wide.
++        self.in_proj = nn.Linear(
++            self.hidden_size, 6 * self.hidden_size, bias=False,
++            dtype=config.params_dtype,
++        )
++
++        # --- Causal depth-wise conv on q,k,v -------------------------------
++        # Short-range smoothing before the recurrence — same trick Mamba uses.
++        # Kernel size 4 is standard; depth-wise so it stays cheap.
++        conv_dim = 3 * self.hidden_size  # over q, k, v
++        self.conv_kernel_size = 4
++        self.conv1d = nn.Conv1d(
++            in_channels=conv_dim,
++            out_channels=conv_dim,
++            kernel_size=self.conv_kernel_size,
++            groups=conv_dim,  # depth-wise
++            padding=self.conv_kernel_size - 1,  # left-pad for causality
++            bias=True,
++            dtype=config.params_dtype,
++        )
++
++        # --- Per-head learned scaling for the recurrent update -------------
++        # mLSTM equation: C_t = f_t * C_{t-1} + i_t * (v_t k_t^T)
++        # n_t = f_t * n_{t-1} + i_t * k_t
++        # Output: h_t = o_t * (C_t q_t) / max(|n_t^T q_t|, 1)
++        # We use a learnable per-head temperature on the gates for stability.
++        self.gate_logit_scale = nn.Parameter(
++            torch.ones(self.num_heads, dtype=config.params_dtype)
++        )
++
++        # --- Output norm + projection --------------------------------------
++        # Group norm over heads (per-head normalization) before output proj.
++        # Acts like the "output norm" in the xLSTM paper.
++        self.out_norm = nn.GroupNorm(
++            num_groups=self.num_heads,
++            num_channels=self.hidden_size,
++            affine=True,
++            dtype=config.params_dtype,
++        )
++        self.out_proj = nn.Linear(
++            self.hidden_size, self.hidden_size, bias=False,
++            dtype=config.params_dtype,
++        )
++
++    # ----------------------------------------------------------------------
++    # Recurrent core
++    # ----------------------------------------------------------------------
++    def _mlstm_recurrent(
++        self, q: Tensor, k: Tensor, v: Tensor,
++        i_gate: Tensor, f_gate: Tensor, o_gate: Tensor,
++    ) -> Tensor:
++        """mLSTM forward pass in matrix-memory form.
++
++        Shapes (all sequence-first):
++            q, k, v : [s, b, num_heads, head_dim]
++            i_gate, f_gate : [s, b, num_heads]  (scalar gates per head)
++            o_gate : [s, b, num_heads, head_dim]  (vector gate per head)
++
++        Returns:
++            output : [s, b, num_heads, head_dim]
++
++        This is the unparallelized reference implementation — fine for
++        throughput benchmarking but slow at long sequences. A fused
++        Triton kernel would be the next step if quality matters; for the
++        gipfelsturm throughput comparison this is sufficient.
++        """
++        s, b, h, d = q.shape
++        device, dtype = q.device, q.dtype
++
++        # Matrix cell state C: [b, h, d, d], scalar normalizer n: [b, h, d]
++        C = torch.zeros(b, h, d, d, device=device, dtype=dtype)
++        n = torch.zeros(b, h, d, device=device, dtype=dtype)
++
++        outputs = []
++        for t in range(s):
++            q_t = q[t]                # [b, h, d]
++            k_t = k[t]                # [b, h, d]
++            v_t = v[t]                # [b, h, d]
++            i_t = i_gate[t].unsqueeze(-1).unsqueeze(-1)  # [b, h, 1, 1]
++            f_t = f_gate[t].unsqueeze(-1).unsqueeze(-1)  # [b, h, 1, 1]
++            o_t = o_gate[t]                              # [b, h, d]
++
++            # Outer product v k^T -> [b, h, d, d]
++            vk = torch.einsum('bhd,bhe->bhde', v_t, k_t)
++
++            # State update
++            C = f_t * C + i_t * vk
++            n = f_gate[t].unsqueeze(-1) * n + i_gate[t].unsqueeze(-1) * k_t
++
++            # Read out: numerator [b, h, d] = C q, denom max(|n^T q|, 1)
++            Cq = torch.einsum('bhde,bhe->bhd', C, q_t)
++            denom = (n * q_t).sum(-1, keepdim=True).abs().clamp(min=1.0)
++            h_t = o_t * (Cq / denom)
++
++            outputs.append(h_t)
++
++        return torch.stack(outputs, dim=0)  # [s, b, h, d]
++
++    # ----------------------------------------------------------------------
++    # forward
++    # ----------------------------------------------------------------------
++    def forward(
++        self,
++        hidden_states: Tensor,
++        attention_mask: Optional[Tensor] = None,
++        key_value_states: Optional[Tensor] = None,
++        inference_context=None,
++        rotary_pos_emb=None,
++        rotary_pos_cos=None,
++        rotary_pos_sin=None,
++        attention_bias=None,
++        packed_seq_params=None,
++        sequence_len_offset=None,
++        rotary_pos_cos_sin=None,
++        **kwargs,
++    ):
++        """Forward pass.
++
++        Args (only the relevant ones — rest are accepted for spec compatibility):
++            hidden_states: [s, b, hidden]
++
++        Returns:
++            (output, bias) where bias is None so get_bias_dropout_add does
++            a plain residual add.
++        """
++        s, b, _ = hidden_states.shape
++
++        # --- Project ------------------------------------------------------
++        proj = self.in_proj(hidden_states)  # [s, b, 6*hidden]
++        q, k, v, i_raw, f_raw, o_raw = proj.chunk(6, dim=-1)
++
++        # --- Causal conv on q,k,v -----------------------------------------
++        # Conv1d expects [b, c, s]; we have [s, b, c]. Transpose, conv, slice
++        # off the right-padding to keep causality, then transpose back.
++        qkv = torch.cat([q, k, v], dim=-1)             # [s, b, 3h]
++        qkv = qkv.permute(1, 2, 0)                     # [b, 3h, s]
++        qkv = self.conv1d(qkv)[..., :s]                # trim causal pad
++        qkv = qkv.permute(2, 0, 1)                     # [s, b, 3h]
++        q, k, v = qkv.chunk(3, dim=-1)
++        q, k, v = (torch.nn.functional.silu(t) for t in (q, k, v))
++
++        # --- Reshape to heads ---------------------------------------------
++        q = q.view(s, b, self.num_heads, self.head_dim)
++        k = k.view(s, b, self.num_heads, self.head_dim)
++        v = v.view(s, b, self.num_heads, self.head_dim)
++
++        # --- Gates --------------------------------------------------------
++        # Input gate: scalar per head (sigmoid)
++        # Forget gate: scalar per head (sigmoid, with learnable scale)
++        # Output gate: vector per head (sigmoid)
++        i_gate = torch.sigmoid(i_raw.view(s, b, self.num_heads, self.head_dim).mean(-1))
++        f_gate = torch.sigmoid(
++            f_raw.view(s, b, self.num_heads, self.head_dim).mean(-1)
++            * self.gate_logit_scale
++        )
++        o_gate = torch.sigmoid(o_raw.view(s, b, self.num_heads, self.head_dim))
++
++        # --- Recurrent core -----------------------------------------------
++        out = self._mlstm_recurrent(q, k, v, i_gate, f_gate, o_gate)
++
++        # --- Merge heads, norm, project -----------------------------------
++        out = out.reshape(s, b, self.hidden_size)
++        # GroupNorm needs [N, C, *] — treat (s*b) as batch
++        out = self.out_norm(out.reshape(s * b, self.hidden_size, 1)).reshape(s, b, self.hidden_size)
++        out = self.out_proj(out)
++
++        # Megatron expects (output, bias) — bias=None means plain residual
++        return out, None
+\ No newline at end of file
+diff --git a/pretrain_xlstm.py b/pretrain_xlstm.py
+new file mode 100644
+index 000000000..b94a4b9c6
+--- /dev/null
++++ b/pretrain_xlstm.py
+@@ -0,0 +1,59 @@
++"""pretrain_xlstm.py — entrypoint for xLSTM throughput runs.
++
++Install path: pretrain_xlstm.py (top-level of Megatron-LM, sibling of pretrain_gpt.py)
++
++Reuses everything from pretrain_gpt.py (data pipeline, loss, training loop,
++argument parsing, distributed setup) and only swaps the layer spec used
++inside model_provider() by monkey-patching get_gpt_decoder_block_spec.
++
++No edits to pretrain_gpt.py or any other Megatron file needed.
++"""
++
++import os
++import runpy
++
++from megatron.core.extensions.transformer_engine import TENorm
++from megatron.core.models.xlstm import xlstm_layer_spec
++from megatron.core.transformer.transformer_block import (
++    TransformerBlockSubmodules,
++    get_num_layers_to_build,
++)
++from megatron.core.transformer.transformer_layer import get_transformer_layer_offset
++
++import megatron.core.models.gpt.gpt_layer_specs as _gpt_specs
++
++
++def _xlstm_block_spec(config, use_transformer_engine, *args, **kwargs):
++    """Drop-in replacement for get_gpt_decoder_block_spec returning an
++    xLSTM-everywhere block. If you want a hybrid (some xLSTM, some attention)
++    layout, this is where you'd interleave."""
++    vp_stage = kwargs.get("vp_stage", None)
++    pp_rank = kwargs.get("pp_rank", None)
++
++    one_layer = xlstm_layer_spec(use_transformer_engine=use_transformer_engine)
++    all_layers = [one_layer] * config.num_layers
++
++    num_layers_to_build = get_num_layers_to_build(
++        config, vp_stage=vp_stage, pp_rank=pp_rank
++    )
++    offset = get_transformer_layer_offset(config, vp_stage=vp_stage, pp_rank=pp_rank)
++    local_layers = all_layers[offset:offset + num_layers_to_build]
++
++    return TransformerBlockSubmodules(
++        layer_specs=local_layers,
++        layer_norm=TENorm if use_transformer_engine else None,
++    )
++
++
++# Monkey-patch the GPT spec resolver. When model_provider() in pretrain_gpt.py
++# calls get_gpt_decoder_block_spec(...), it gets our xLSTM block instead.
++_gpt_specs.get_gpt_decoder_block_spec = _xlstm_block_spec
++
++
++if __name__ == "__main__":
++    # Run pretrain_gpt's main with the patch in place. Use runpy so the
++    # __name__ == "__main__" guard inside pretrain_gpt.py fires.
++    pretrain_gpt_path = os.path.join(
++        os.path.dirname(os.path.abspath(__file__)), "pretrain_gpt.py"
++    )
++    runpy.run_path(pretrain_gpt_path, run_name="__main__")
+\ No newline at end of file

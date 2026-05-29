@@ -1,0 +1,80 @@
+# Patch: Expose Gated Delta Net (GDN) args on the CLI
+#
+# Problem:
+#   Megatron-LM's _add_experimental_attention_variant_args only exposes
+#   --linear-attention-freq. The fields config.experimental_attention_variant
+#   and config.linear_{conv_kernel_dim,key_head_dim,value_head_dim,
+#   num_key_heads,num_value_heads} exist in TransformerConfig and are read
+#   from `args` by the auto-copy in arguments.py, but no argparse entries
+#   exist for them. Without these, you cannot enable GDN from the command
+#   line: even passing --experimental-attention-variant gated_delta_net
+#   triggers an "unrecognized argument" error.
+#
+# What this patch does:
+#   Extends megatron/training/arguments.py:_add_experimental_attention_variant_args
+#   to add the six missing flags. Defaults are left as None so the
+#   TransformerConfig defaults (linear_key_head_dim=128, etc.) apply when
+#   the flags are omitted. The choices list for --experimental-attention-variant
+#   is sourced from the Literal in TransformerConfig.
+#
+# How to find the right location in a future version:
+#   Search arguments.py for `_add_experimental_attention_variant_args`. The
+#   function adds an argparse group titled "experimental_attention_variant"
+#   and currently only contains --linear-attention-freq. Add the new flags
+#   to the same group.
+#
+# Applied to: Megatron-LM core_v0.16.1
+
+diff --git a/megatron/training/arguments.py b/megatron/training/arguments.py
+index 46f3c28b1..7b1b419ec 100644
+--- a/megatron/training/arguments.py
++++ b/megatron/training/arguments.py
+@@ -2745,7 +2745,19 @@ def _add_mla_args(parser):
+ 
+ def _add_experimental_attention_variant_args(parser):
+     group = parser.add_argument_group(title="experimental_attention_variant")
+-    # Linear attention
++
++    # Select the specific attention variant
++    group.add_argument('--experimental-attention-variant', type=str, default=None,
++                       choices=['gated_delta_net', 'dsa'],
++                       help='Select an experimental attention variant. '
++                            '"gated_delta_net" replaces self-attention with the '
++                            'Gated DeltaNet linear-attention layer (ICLR 2025, '
++                            'NVIDIA). "dsa" enables DeepSeek Sparse Attention '
++                            '(requires --multi-latent-attention). '
++                            'When set to "gated_delta_net", --linear-attention-freq '
++                            'must also be specified.')
++
++    # Linear attention frequency
+     group.add_argument('--linear-attention-freq', type=la_freq_type, default=None,
+                        help='Frequency between LA (linear attention) layers and'
+                             ' SDPA (scaled dot-product attention) layers. Accepts either: '
+@@ -2755,6 +2767,29 @@ def _add_experimental_attention_variant_args(parser):
+                             'where 1 indicates an LA layer and 0 indicates a SDPA layer. '
+                             'Examples: "([0]+[1]*23)": 1 SDPA layer followed by 23 LA layers, '
+                             '"([1]*3+[0]*2)*2": Three LA layers followed by two SDPA layers, repeated twice.')
++
++    # Gated Delta Net hyperparameters (see TransformerConfig for defaults)
++    group.add_argument('--linear-conv-kernel-dim', type=int, default=None,
++                       help='1D causal-convolution kernel size used inside the '
++                            'Gated Delta Net layer (default in TransformerConfig: 4).')
++
++    group.add_argument('--linear-key-head-dim', type=int, default=None,
++                       help='Per-head dimension of the K projection in Gated Delta '
++                            'Net (default in TransformerConfig: 128).')
++
++    group.add_argument('--linear-value-head-dim', type=int, default=None,
++                       help='Per-head dimension of the V projection in Gated Delta '
++                            'Net (default in TransformerConfig: 128).')
++
++    group.add_argument('--linear-num-key-heads', type=int, default=None,
++                       help='Number of K heads in Gated Delta Net (default in '
++                            'TransformerConfig: 16). Must be divisible by TP.')
++
++    group.add_argument('--linear-num-value-heads', type=int, default=None,
++                       help='Number of V heads in Gated Delta Net (default in '
++                            'TransformerConfig: 32). Must be a multiple of '
++                            '--linear-num-key-heads and divisible by TP.')
++
+     return parser
